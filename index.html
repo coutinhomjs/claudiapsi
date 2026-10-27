@@ -1,0 +1,2241 @@
+<!DOCTYPE html>
+<html lang="pt-PT">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>PsiStudio | Cláudia Mesquita — Psicologia Clínica & Online</title>
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Lucide Icons CDN -->
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        sage: {
+                            50: '#f4f7f5',
+                            100: '#e6ede8',
+                            200: '#cfddd3',
+                            300: '#abc3b2',
+                            400: '#81a38b',
+                            500: '#61866d',
+                            600: '#4b6b56',
+                            700: '#3d5646',
+                            800: '#33463a',
+                            900: '#2b3a31',
+                        },
+                        sand: {
+                            50: '#faf9f6',
+                            100: '#f3f1ec',
+                            200: '#e6e2d8',
+                            800: '#4a4740',
+                            900: '#2d2b26'
+                        }
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,600;0,700;1,600&family=Inter:wght@300;400;500;600;700&display=swap');
+        
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #faf9f6;
+            color: #2d2b26;
+        }
+        .font-serif-clinical {
+            font-family: 'Cormorant Garamond', Georgia, serif;
+        }
+        .privacy-blur {
+            filter: blur(6px);
+            user-select: none;
+            transition: filter 0.25s ease;
+        }
+        .privacy-blur:hover {
+            filter: blur(2px);
+        }
+        .custom-scrollbar::-webkit-scrollbar { width: 6px; height: 6px; }
+        .custom-scrollbar::-webkit-scrollbar-track { background: #f3f1ec; }
+        .custom-scrollbar::-webkit-scrollbar-thumb { background: #cfddd3; border-radius: 4px; }
+        
+        @media print {
+            body * { visibility: hidden; }
+            #print-container, #print-container * { visibility: visible; }
+            #print-container {
+                position: absolute;
+                left: 0;
+                top: 0;
+                width: 100%;
+                padding: 20mm;
+                background: white !important;
+                color: #111 !important;
+            }
+            .no-print { display: none !important; }
+        }
+    </style>
+</head>
+<body class="h-screen flex overflow-hidden selection:bg-sage-600 selection:text-white">
+
+    <!-- ==================== ECRÃ DE BLOQUEIO PIN ==================== -->
+    <div id="pin-lock-screen" class="fixed inset-0 bg-sage-900/95 backdrop-blur-md z-50 hidden flex-col items-center justify-center p-6 text-white">
+        <div class="bg-sage-800/90 border border-sage-600/40 rounded-3xl p-8 max-w-sm w-full text-center shadow-2xl space-y-5">
+            <div class="w-14 h-14 rounded-2xl bg-sage-600/40 border border-sage-400/30 flex items-center justify-center mx-auto text-sage-200">
+                <i data-lucide="lock" class="w-7 h-7"></i>
+            </div>
+            <div>
+                <h2 class="font-serif-clinical text-2xl font-bold tracking-wide text-white">PsiStudio Bloqueado</h2>
+                <p class="text-xs text-sage-200 mt-1">Proteção de Sigilo Clínico (OPP / RGPD)</p>
+            </div>
+            <div class="space-y-3">
+                <input type="password" id="pin-input" maxlength="6" placeholder="Introduza o PIN (padrão: 1234)" class="w-full text-center tracking-[0.5em] font-bold text-lg py-3 px-4 rounded-xl bg-sage-900/90 border border-sage-600 text-white focus:outline-none focus:border-sage-300" onkeydown="if(event.key==='Enter') unlockWithPin()">
+                <p id="pin-error" class="text-xs text-rose-300 hidden">PIN incorreto. Tente novamente.</p>
+                <button onclick="unlockWithPin()" class="w-full py-2.5 bg-sage-500 hover:bg-sage-400 text-white font-semibold rounded-xl text-xs transition shadow-md">
+                    Desbloquear Consultório
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- ==================== BARRA LATERAL (SIDEBAR) ==================== -->
+    <aside class="w-64 bg-sage-900 text-sage-100 flex flex-col justify-between shrink-0 no-print border-r border-sage-800">
+        <div>
+            <!-- Identidade Clínica -->
+            <div class="p-5 border-b border-sage-800/80 flex items-center gap-3.5">
+                <div class="w-11 h-11 rounded-2xl bg-sage-600 flex items-center justify-center text-white shadow-inner font-serif-clinical text-xl font-bold">
+                    CM
+                </div>
+                <div class="min-w-0">
+                    <h1 class="font-serif-clinical text-xl font-bold text-white leading-none truncate" id="sidebar-prof-name">Cláudia Mesquita</h1>
+                    <p class="text-[11px] text-sage-300 mt-1 truncate">Psicologia Clínica & Online</p>
+                    <span class="inline-block mt-1 text-[10px] px-2 py-0.5 rounded-full bg-sage-800 text-sage-200 border border-sage-700" id="sidebar-prof-opp">Cédula OPP</span>
+                </div>
+            </div>
+
+            <!-- Navegação Principal -->
+            <nav class="p-3 space-y-1 overflow-y-auto max-h-[calc(100vh-180px)] custom-scrollbar">
+                <div class="px-3 py-1 text-[10px] uppercase tracking-wider text-sage-400 font-semibold">Consultório Diário</div>
+                
+                <button onclick="switchTab('agenda')" id="nav-agenda" class="nav-btn w-full flex items-center justify-between px-3 py-2.5 rounded-xl text-xs font-medium bg-sage-600 text-white shadow-sm transition">
+                    <span class="flex items-center gap-2.5"><i data-lucide="calendar-heart" class="w-4 h-4"></i> Painel & Agenda Online</span>
+                    <span id="badge-hoje" class="text-[10px] px-1.5 py-0.5 rounded-md bg-sage-800 text-sage-100 font-bold">0</span>
+                </button>
+
+                <button onclick="switchTab('sessao')" id="nav-sessao" class="nav-btn w-full flex items-center justify-between px-3 py-2.5 rounded-xl text-xs font-medium text-sage-200 hover:bg-sage-800/70 transition">
+                    <span class="flex items-center gap-2.5"><i data-lucide="video" class="w-4 h-4 text-emerald-300"></i> Modo Sessão Ao Vivo</span>
+                    <span class="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span>
+                </button>
+
+                <div class="pt-3 px-3 py-1 text-[10px] uppercase tracking-wider text-sage-400 font-semibold">Prática Clínica</div>
+
+                <button onclick="switchTab('pacientes')" id="nav-pacientes" class="nav-btn w-full flex items-center justify-between px-3 py-2.5 rounded-xl text-xs font-medium text-sage-200 hover:bg-sage-800/70 transition">
+                    <span class="flex items-center gap-2.5"><i data-lucide="folder-heart" class="w-4 h-4"></i> Dossiers Clínicos (4Ps)</span>
+                    <span id="badge-pacientes" class="text-[10px] px-1.5 py-0.5 rounded-md bg-sage-800 text-sage-200">3</span>
+                </button>
+
+                <button onclick="switchTab('escalas')" id="nav-escalas" class="nav-btn w-full flex items-center gap-2.5 px-3 py-2.5 rounded-xl text-xs font-medium text-sage-200 hover:bg-sage-800/70 transition">
+                    <i data-lucide="activity" class="w-4 h-4 text-amber-300"></i> Escalas PHQ-9 & GAD-7
+                </button>
+
+                <button onclick="switchTab('recursos')" id="nav-recursos" class="nav-btn w-full flex items-center gap-2.5 px-3 py-2.5 rounded-xl text-xs font-medium text-sage-200 hover:bg-sage-800/70 transition">
+                    <i data-lucide="book-open-check" class="w-4 h-4"></i> Biblioteca & TPCs
+                </button>
+
+                <button onclick="switchTab('espera')" id="nav-espera" class="nav-btn w-full flex items-center justify-between px-3 py-2.5 rounded-xl text-xs font-medium text-sage-200 hover:bg-sage-800/70 transition">
+                    <span class="flex items-center gap-2.5"><i data-lucide="user-plus" class="w-4 h-4"></i> Lista de Espera & Triagem</span>
+                    <span id="badge-espera" class="text-[10px] px-1.5 py-0.5 rounded-md bg-amber-500/20 text-amber-200 font-bold">2</span>
+                </button>
+
+                <div class="pt-3 px-3 py-1 text-[10px] uppercase tracking-wider text-sage-400 font-semibold">Gestão, Finanças & Documentos</div>
+
+                <button onclick="switchTab('financeiro')" id="nav-financeiro" class="nav-btn w-full flex items-center justify-between px-3 py-2.5 rounded-xl text-xs font-medium text-sage-200 hover:bg-sage-800/70 transition">
+                    <span class="flex items-center gap-2.5"><i data-lucide="wallet" class="w-4 h-4 text-emerald-300"></i> Honorários & Recibos AT</span>
+                    <span id="badge-recibos" class="text-[10px] px-1.5 py-0.5 rounded-md bg-rose-500/30 text-rose-200 font-bold">0</span>
+                </button>
+
+                <button onclick="switchTab('documentos')" id="nav-documentos" class="nav-btn w-full flex items-center gap-2.5 px-3 py-2.5 rounded-xl text-xs font-medium text-sage-200 hover:bg-sage-800/70 transition">
+                    <i data-lucide="file-text" class="w-4 h-4"></i> Declarações & Relatórios
+                </button>
+
+                <button onclick="switchTab('config')" id="nav-config" class="nav-btn w-full flex items-center gap-2.5 px-3 py-2.5 rounded-xl text-xs font-medium text-sage-200 hover:bg-sage-800/70 transition">
+                    <i data-lucide="shield-check" class="w-4 h-4"></i> Backup RGPD & Perfil
+                </button>
+            </nav>
+        </div>
+
+        <!-- Rodapé Sidebar -->
+        <div class="p-4 bg-sage-950/60 border-t border-sage-800/80 text-[11px] space-y-1">
+            <div class="flex items-center justify-between">
+                <span class="text-sage-400">Armazenamento:</span>
+                <span class="text-emerald-300 font-medium flex items-center gap-1"><i data-lucide="shield" class="w-3 h-3"></i> Local Soberano</span>
+            </div>
+            <p class="text-[10px] text-sage-400">Sigilo Profissional OPP • Zero Cloud</p>
+        </div>
+    </aside>
+
+    <!-- ==================== CONTEÚDO PRINCIPAL ==================== -->
+    <div class="flex-1 flex flex-col overflow-hidden">
+
+        <!-- BARRA SUPERIOR (TOPBAR) -->
+        <header class="h-16 bg-white/90 backdrop-blur border-b border-sand-200 px-6 flex items-center justify-between shrink-0 no-print">
+            <div class="flex items-center gap-3">
+                <h2 id="topbar-title" class="font-serif-clinical text-2xl font-bold text-sage-900">Painel do Dia & Agenda de Telepsicologia</h2>
+                <span id="privacy-active-pill" class="hidden px-2.5 py-0.5 rounded-full bg-amber-100 text-amber-800 border border-amber-300 text-[11px] font-semibold items-center gap-1">
+                    <i data-lucide="eye-off" class="w-3 h-3"></i> Modo Privacidade Ativo (ESC)
+                </span>
+            </div>
+
+            <!-- Controlos de Sigilo, Privacidade e Backup Rápido -->
+            <div class="flex items-center gap-2.5">
+                <button onclick="togglePrivacyMode()" id="btn-privacy" class="px-3 py-1.5 rounded-xl border border-sand-200 bg-sand-50 hover:bg-sand-100 text-xs font-medium text-slate-700 flex items-center gap-1.5 transition" title="Tecla de atalho: ESC">
+                    <i data-lucide="eye-off" class="w-3.5 h-3.5 text-sage-600"></i>
+                    <span>Modo Privacidade (ESC)</span>
+                </button>
+
+                <button onclick="lockScreen()" class="px-3 py-1.5 rounded-xl border border-sand-200 bg-sand-50 hover:bg-sand-100 text-xs font-medium text-slate-700 flex items-center gap-1.5 transition" title="Bloquear ecrã com PIN">
+                    <i data-lucide="lock" class="w-3.5 h-3.5 text-amber-600"></i>
+                    <span class="hidden sm:inline">Bloquear (PIN)</span>
+                </button>
+
+                <button onclick="exportBackupJSON()" class="px-3 py-1.5 rounded-xl bg-sage-600 hover:bg-sage-700 text-white text-xs font-semibold flex items-center gap-1.5 shadow-sm transition">
+                    <i data-lucide="download" class="w-3.5 h-3.5"></i>
+                    <span class="hidden md:inline">Guardar Backup</span>
+                </button>
+            </div>
+        </header>
+
+        <!-- ÁREA DE VISTAS DINÂMICAS -->
+        <main class="flex-1 overflow-y-auto p-6 space-y-6 custom-scrollbar no-print">
+
+            <!-- ==================== VISTA 1: PAINEL DO DIA & AGENDA ==================== -->
+            <section id="view-agenda" class="tab-view space-y-6">
+                <!-- Banner de Boas-vindas & Autocuidado da Psicóloga -->
+                <div class="bg-gradient-to-r from-sage-800 via-sage-700 to-sage-800 rounded-2xl p-5 text-white shadow-sm flex flex-wrap items-center justify-between gap-4">
+                    <div class="space-y-1">
+                        <div class="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full bg-white/15 text-sage-100 text-[11px] font-medium">
+                            <i data-lucide="sparkles" class="w-3.5 h-3.5"></i> Consultório Digital • Telepsicologia & Presencial
+                        </div>
+                        <h3 class="font-serif-clinical text-2xl font-bold">Bom trabalho clínico, Dra. Cláudia Mesquita</h3>
+                        <p class="text-xs text-sage-100/90" id="autocuidado-msg">Equilíbrio de carga horária semanal dentro do limite saudável recomendado.</p>
+                    </div>
+                    <div class="flex items-center gap-3">
+                        <button onclick="openModalNovaSessaoAgenda()" class="px-4 py-2.5 bg-white text-sage-900 hover:bg-sand-100 rounded-xl text-xs font-bold flex items-center gap-1.5 shadow-sm transition">
+                            <i data-lucide="calendar-plus" class="w-4 h-4 text-sage-600"></i> Agendar Consulta
+                        </button>
+                        <button onclick="exportAgendaICS()" class="px-3.5 py-2.5 bg-sage-900/50 hover:bg-sage-900/80 text-white border border-sage-500/40 rounded-xl text-xs font-semibold flex items-center gap-1.5 transition">
+                            <i data-lucide="calendar" class="w-4 h-4"></i> Exportar .ICS
+                        </button>
+                    </div>
+                </div>
+
+                <!-- 4 KPIs Executivos -->
+                <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+                    <div class="bg-white p-4 rounded-2xl border border-sand-200 shadow-sm">
+                        <div class="flex items-center justify-between text-xs text-slate-500 font-medium">
+                            <span>Consultas Agendadas</span>
+                            <i data-lucide="calendar-check" class="w-4 h-4 text-sage-600"></i>
+                        </div>
+                        <div class="text-2xl font-bold text-slate-800 mt-1" id="kpi-agenda-total">0</div>
+                        <p class="text-[11px] text-sage-600 mt-1" id="kpi-agenda-detalhe">Sessões na lista ativa</p>
+                    </div>
+
+                    <div class="bg-white p-4 rounded-2xl border border-sand-200 shadow-sm">
+                        <div class="flex items-center justify-between text-xs text-slate-500 font-medium">
+                            <span>Carga Semanal (Autocuidado)</span>
+                            <i data-lucide="heart-handshake" class="w-4 h-4 text-emerald-600"></i>
+                        </div>
+                        <div class="text-2xl font-bold text-slate-800 mt-1" id="kpi-horas-semana">0h</div>
+                        <p class="text-[11px] text-emerald-700 mt-1" id="kpi-fadiga-status">Ritmo saudável (máx. sugerido 25h)</p>
+                    </div>
+
+                    <div class="bg-white p-4 rounded-2xl border border-sand-200 shadow-sm">
+                        <div class="flex items-center justify-between text-xs text-slate-500 font-medium">
+                            <span>Receita Recebida vs Pendente</span>
+                            <i data-lucide="coins" class="w-4 h-4 text-amber-600"></i>
+                        </div>
+                        <div class="text-2xl font-bold text-slate-800 mt-1 sensitive-data" id="kpi-receita-mes">0,00 €</div>
+                        <p class="text-[11px] text-amber-700 mt-1 sensitive-data" id="kpi-receita-pendente">Pendente: 0,00 €</p>
+                    </div>
+
+                    <div class="bg-white p-4 rounded-2xl border border-sand-200 shadow-sm">
+                        <div class="flex items-center justify-between text-xs text-slate-500 font-medium">
+                            <span>Recibos Verdes (AT) por Emitir</span>
+                            <i data-lucide="receipt" class="w-4 h-4 text-rose-600"></i>
+                        </div>
+                        <div class="text-2xl font-bold text-rose-600 mt-1" id="kpi-recibos-pendentes">0</div>
+                        <button onclick="switchTab('financeiro')" class="text-[11px] text-sage-700 font-semibold hover:underline mt-1 inline-block">Ir para reconciliação AT &rarr;</button>
+                    </div>
+                </div>
+
+                <!-- Tabela da Agenda de Telepsicologia + Alertas Clínicos -->
+                <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+                    <div class="lg:col-span-2 bg-white rounded-2xl border border-sand-200 shadow-sm overflow-hidden">
+                        <div class="px-5 py-4 border-b border-sand-200 flex items-center justify-between">
+                            <div>
+                                <h3 class="font-bold text-sm text-slate-800">Agenda de Consultas & Telepsicologia</h3>
+                                <p class="text-[11px] text-slate-500">Clique em "Iniciar Sessão" para abrir o Cockpit Ao Vivo com cronómetro e memória clínica</p>
+                            </div>
+                        </div>
+                        <div class="overflow-x-auto">
+                            <table class="w-full text-left border-collapse text-xs">
+                                <thead>
+                                    <tr class="bg-sand-50 border-b border-sand-200 text-[10px] uppercase font-bold text-slate-500">
+                                        <th class="py-3 px-4">Data / Hora</th>
+                                        <th class="py-3 px-4">Paciente</th>
+                                        <th class="py-3 px-4">Formato / Honorários</th>
+                                        <th class="py-3 px-4">Estado</th>
+                                        <th class="py-3 px-4 text-right">Ações Rápidas</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="agenda-table-body" class="divide-y divide-sand-100"></tbody>
+                            </table>
+                        </div>
+                    </div>
+
+                    <!-- Radar de Continuidade Terapêutica & Segurança -->
+                    <div class="bg-white rounded-2xl border border-sand-200 shadow-sm p-5 space-y-4">
+                        <div class="border-b border-sand-100 pb-3">
+                            <h3 class="font-bold text-sm text-slate-800 flex items-center gap-2">
+                                <i data-lucide="bell-ring" class="w-4 h-4 text-sage-600"></i> Radar Clínico & Alertas de Sessão
+                            </h3>
+                            <p class="text-[11px] text-slate-500">Monitorização de atenção clínica, consentimentos OPP e pagamentos pendentes</p>
+                        </div>
+                        <div id="radar-clinico-list" class="space-y-2.5 text-xs"></div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- ==================== VISTA 2: MODO "EM SESSÃO AO VIVO" (COCKPIT) ==================== -->
+            <section id="view-sessao" class="tab-view hidden space-y-5">
+                <!-- Barra de Controlo da Sessão + Cronómetro 50 min -->
+                <div id="timer-header-bar" class="bg-sage-900 text-white rounded-2xl p-4 shadow-md flex flex-wrap items-center justify-between gap-4 transition-colors duration-500">
+                    <div class="flex items-center gap-3">
+                        <div class="p-2.5 rounded-xl bg-white/10">
+                            <i data-lucide="video" class="w-5 h-5 text-emerald-300"></i>
+                        </div>
+                        <div>
+                            <div class="flex items-center gap-2">
+                                <span class="text-[10px] uppercase tracking-wider px-2 py-0.5 rounded bg-emerald-500/20 text-emerald-200 font-semibold">Cockpit de Consulta Ao Vivo</span>
+                                <span id="live-fee-badge" class="text-[11px] px-2 py-0.5 rounded bg-sage-700 text-sage-100 font-semibold">50,00 € / consulta</span>
+                            </div>
+                            <div class="flex items-center gap-2 mt-1">
+                                <label class="text-xs text-sage-200">Paciente em consulta:</label>
+                                <select id="live-patient-select" onchange="loadLiveSessionPatient(this.value)" class="bg-sage-800 text-white font-bold text-sm px-3 py-1 rounded-lg border border-sage-600 focus:outline-none"></select>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Cronómetro Terapêutico de 50 Minutos -->
+                    <div class="flex items-center gap-4 bg-sage-950/60 px-4 py-2 rounded-xl border border-sage-700">
+                        <div>
+                            <div class="text-[10px] uppercase text-sage-300" id="timer-status-label">Tempo de Sessão (50 min)</div>
+                            <div class="text-2xl font-mono font-bold tracking-wider" id="session-timer-display">00:00</div>
+                        </div>
+                        <div class="flex items-center gap-1.5">
+                            <button onclick="startPauseTimer()" id="btn-timer-toggle" class="px-3 py-1.5 bg-emerald-600 hover:bg-emerald-500 text-white rounded-lg text-xs font-semibold flex items-center gap-1">
+                                <i data-lucide="play" class="w-3.5 h-3.5"></i> Iniciar
+                            </button>
+                            <button onclick="resetTimer()" class="p-1.5 bg-sage-800 hover:bg-sage-700 text-sage-200 rounded-lg" title="Reiniciar Cronómetro">
+                                <i data-lucide="rotate-ccw" class="w-3.5 h-3.5"></i>
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- Link Direto Videochamada -->
+                    <div class="flex items-center gap-2">
+                        <a id="live-video-link" href="https://meet.google.com" target="_blank" class="px-4 py-2 bg-white text-sage-900 hover:bg-sand-100 rounded-xl text-xs font-bold flex items-center gap-1.5 shadow-sm">
+                            <i data-lucide="external-link" class="w-3.5 h-3.5 text-sage-700"></i> Abrir Videochamada
+                        </a>
+                    </div>
+                </div>
+
+                <!-- Grelha Cockpit: Memória Clínica Rápida (Esq) + Editor da Sessão Atual (Dir) -->
+                <div class="grid grid-cols-1 lg:grid-cols-12 gap-6">
+                    <!-- Coluna Esquerda (4 cols): Memória Clínica & Segurança OPP -->
+                    <div class="lg:col-span-4 space-y-4">
+                        <div class="bg-white rounded-2xl border border-sand-200 p-5 shadow-sm space-y-3">
+                            <h4 class="font-bold text-xs uppercase tracking-wider text-sage-700 flex items-center gap-1.5">
+                                <i data-lucide="history" class="w-4 h-4"></i> Resumo da Última Sessão & TPC
+                            </h4>
+                            <div class="p-3 rounded-xl bg-sand-50 border border-sand-200 text-xs space-y-2 sensitive-note">
+                                <div>
+                                    <span class="font-semibold text-slate-700">Última nota:</span>
+                                    <p id="live-last-summary" class="text-slate-600 mt-0.5 leading-relaxed">-</p>
+                                </div>
+                                <div class="pt-2 border-t border-sand-200">
+                                    <span class="font-semibold text-amber-800">TPC / Estratégia que ficou combinada:</span>
+                                    <p id="live-last-tpc" class="text-amber-900 mt-0.5 font-medium">-</p>
+                                </div>
+                                <div class="pt-2 border-t border-sand-200">
+                                    <span class="font-semibold text-sage-800">Tópicos para retomar hoje:</span>
+                                    <p id="live-last-nexttopics" class="text-sage-900 mt-0.5">-</p>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="bg-white rounded-2xl border border-sand-200 p-5 shadow-sm space-y-3">
+                            <h4 class="font-bold text-xs uppercase tracking-wider text-sage-700 flex items-center gap-1.5">
+                                <i data-lucide="users" class="w-4 h-4"></i> Mapa Relacional & Medicação
+                            </h4>
+                            <div class="text-xs space-y-2 sensitive-note">
+                                <div class="p-2.5 rounded-lg bg-sage-50/70 border border-sage-100">
+                                    <span class="font-semibold text-sage-900 block">Pessoas Significativas / Genograma:</span>
+                                    <span id="live-genograma" class="text-slate-600">-</span>
+                                </div>
+                                <div class="p-2.5 rounded-lg bg-sand-50 border border-sand-200">
+                                    <span class="font-semibold text-slate-700 block">Medicação Psiquiátrica / Clínica:</span>
+                                    <span id="live-medicacao" class="text-slate-600">-</span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Bloco Segurança Telepsicologia OPP -->
+                        <div class="bg-rose-50/60 rounded-2xl border border-rose-200 p-4 text-xs space-y-1.5">
+                            <div class="font-bold text-rose-900 flex items-center gap-1.5">
+                                <i data-lucide="shield-alert" class="w-4 h-4 text-rose-600"></i> Segurança em Telepsicologia (OPP)
+                            </div>
+                            <p class="text-slate-700"><strong>Localização habitual na consulta:</strong> <span id="live-morada">-</span></p>
+                            <p class="text-slate-700"><strong>Contacto de Emergência:</strong> <span id="live-emergencia" class="font-semibold text-rose-900">-</span></p>
+                        </div>
+                    </div>
+
+                    <!-- Coluna Central/Direita (8 cols): Registo Estruturado da Sessão Atual -->
+                    <div class="lg:col-span-8 bg-white rounded-2xl border border-sand-200 p-6 shadow-sm space-y-4">
+                        <div class="flex items-center justify-between border-b border-sand-100 pb-3">
+                            <div>
+                                <h3 class="font-bold text-base text-slate-800">Registo Clínico da Sessão Atual</h3>
+                                <p class="text-xs text-slate-500">As notas são guardadas na cronologia privada do paciente e geram o registo da sessão para faturação</p>
+                            </div>
+                            <span id="live-session-number-badge" class="px-3 py-1 rounded-full bg-sage-100 text-sage-800 font-bold text-xs">Sessão</span>
+                        </div>
+
+                        <form id="form-live-session" onsubmit="saveLiveSession(event)" class="space-y-4 text-xs">
+                            <div class="grid grid-cols-1 sm:grid-cols-4 gap-4">
+                                <div>
+                                    <label class="block font-semibold text-slate-700 mb-1">Data da Sessão</label>
+                                    <input type="date" id="live-date" required class="w-full p-2.5 border border-sand-200 rounded-xl bg-sand-50">
+                                </div>
+                                <div>
+                                    <label class="block font-semibold text-slate-700 mb-1">Humor Subjetivo (1-10)</label>
+                                    <input type="number" id="live-mood" min="1" max="10" value="7" required class="w-full p-2.5 border border-sand-200 rounded-xl bg-sand-50 font-bold">
+                                </div>
+                                <div>
+                                    <label class="block font-semibold text-slate-700 mb-1">Valor da Consulta (€)</label>
+                                    <input type="number" step="0.01" id="live-session-amount" value="50" required class="w-full p-2.5 border border-sand-200 rounded-xl bg-sand-50 font-bold">
+                                </div>
+                                <div>
+                                    <label class="block font-semibold text-slate-700 mb-1">Estado do Pagamento</label>
+                                    <select id="live-payment-status" class="w-full p-2.5 border border-sand-200 rounded-xl bg-white font-semibold">
+                                        <option value="Pago MBWay">Pago (MBWay)</option>
+                                        <option value="Pago Transferência">Pago (Transferência)</option>
+                                        <option value="Pago Numerário">Pago (Numerário)</option>
+                                        <option value="Pendente">Pagamento Pendente</option>
+                                    </select>
+                                </div>
+                            </div>
+
+                            <div>
+                                <label class="block font-semibold text-slate-700 mb-1">Temas Abordados & Observação Clínica (Subjetivo / Objetivo)</label>
+                                <textarea id="live-themes" rows="4" required placeholder="Descreva a narrativa trazida pelo paciente, estado afetivo, pensamentos automáticos ou eventos da semana..." class="w-full p-3 border border-sand-200 rounded-xl bg-sand-50/50 focus:bg-white focus:outline-none focus:ring-2 focus:ring-sage-500"></textarea>
+                            </div>
+
+                            <div>
+                                <label class="block font-semibold text-slate-700 mb-1">Intervenção Terapêutica Realizada na Sessão</label>
+                                <textarea id="live-intervention" rows="2" placeholder="Ex: Reestruturação cognitiva, psicoeducação, validação emocional, exercício de exposição ou regulação..." class="w-full p-3 border border-sand-200 rounded-xl bg-sand-50/50 focus:bg-white focus:outline-none focus:ring-2 focus:ring-sage-500"></textarea>
+                            </div>
+
+                            <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                                <div>
+                                    <label class="block font-semibold text-amber-800 mb-1">TPC / Tarefa Terapêutica Entre Sessões</label>
+                                    <input type="text" id="live-tpc" placeholder="Ex: Preencher registo de pensamentos / Higiene do sono" class="w-full p-2.5 border border-amber-200 rounded-xl bg-amber-50/40">
+                                </div>
+                                <div>
+                                    <label class="block font-semibold text-sage-800 mb-1">Tópicos a Retomar na Próxima Consulta</label>
+                                    <input type="text" id="live-next-topics" placeholder="Ex: Avaliar limites no trabalho e relação materna" class="w-full p-2.5 border border-sage-200 rounded-xl bg-sage-50/40">
+                                </div>
+                            </div>
+
+                            <div class="flex flex-wrap items-center justify-between gap-4 pt-3 border-t border-sand-200">
+                                <span class="text-[11px] text-slate-500 flex items-center gap-1.5">
+                                    <i data-lucide="shield-check" class="w-4 h-4 text-sage-600"></i> Registo individual automático na conta-corrente e lista de Recibos Verdes (AT)
+                                </span>
+                                <button type="submit" class="px-5 py-2.5 bg-sage-600 hover:bg-sage-700 text-white rounded-xl font-bold flex items-center gap-2 shadow-sm transition">
+                                    <i data-lucide="check-circle-2" class="w-4 h-4"></i> Concluir e Guardar Sessão no Dossier
+                                </button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </section>
+
+            <!-- ==================== VISTA 3: DOSSIERS CLÍNICOS & CONCEPTUALIZAÇÃO (4Ps) ==================== -->
+            <section id="view-pacientes" class="tab-view hidden space-y-6">
+                <div class="grid grid-cols-1 lg:grid-cols-12 gap-6">
+                    <!-- Lista Lateral de Pacientes (4 cols) -->
+                    <div class="lg:col-span-4 bg-white rounded-2xl border border-sand-200 shadow-sm p-4 flex flex-col h-[calc(100vh-140px)]">
+                        <div class="flex items-center justify-between mb-3">
+                            <h3 class="font-bold text-sm text-slate-800">Pacientes em Acompanhamento</h3>
+                            <button onclick="openModalNovoPaciente()" class="px-2.5 py-1.5 bg-sage-600 hover:bg-sage-700 text-white rounded-lg text-xs font-semibold flex items-center gap-1">
+                                <i data-lucide="user-plus" class="w-3.5 h-3.5"></i> Novo
+                            </button>
+                        </div>
+                        <div class="relative mb-3">
+                            <i data-lucide="search" class="w-3.5 h-3.5 text-slate-400 absolute left-3 top-1/2 -translate-y-1/2"></i>
+                            <input type="text" id="search-patient-input" oninput="renderPatientsList()" placeholder="Procurar paciente, código ou motivo..." class="w-full pl-8 pr-3 py-2 bg-sand-50 border border-sand-200 rounded-xl text-xs focus:outline-none">
+                        </div>
+                        <div id="patients-sidebar-list" class="flex-1 overflow-y-auto space-y-2 custom-scrollbar pr-1"></div>
+                    </div>
+
+                    <!-- Ficha Clínica Detalhada do Paciente Selecionado (8 cols) -->
+                    <div class="lg:col-span-8 bg-white rounded-2xl border border-sand-200 shadow-sm p-6 overflow-y-auto h-[calc(100vh-140px)] custom-scrollbar space-y-6" id="patient-dossier-panel">
+                        <!-- Preenchido dinamicamente por JS -->
+                    </div>
+                </div>
+            </section>
+
+            <!-- ==================== VISTA 4: ESCALAS PSICOMÉTRICAS (PHQ-9 & GAD-7) ==================== -->
+            <section id="view-escalas" class="tab-view hidden space-y-6">
+                <div class="bg-white rounded-2xl border border-sand-200 p-5 shadow-sm flex flex-wrap items-center justify-between gap-4">
+                    <div>
+                        <h3 class="font-bold text-base text-slate-800">Avaliação Psicométrica & Monitorização de Sintomatologia</h3>
+                        <p class="text-xs text-slate-500">Aplicação rápida de PHQ-9 (Depressão) e GAD-7 (Ansiedade Generalizada) com gráfico longitudinal de evolução</p>
+                    </div>
+                    <div class="flex items-center gap-2">
+                        <span class="text-xs font-semibold text-slate-600">Paciente:</span>
+                        <select id="scale-patient-select" onchange="renderScalesView()" class="p-2 border border-sand-200 rounded-xl bg-sand-50 text-xs font-bold"></select>
+                    </div>
+                </div>
+
+                <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                    <!-- Calculadora PHQ-9 & GAD-7 -->
+                    <div class="bg-white rounded-2xl border border-sand-200 p-5 shadow-sm space-y-4">
+                        <div class="flex items-center justify-between border-b border-sand-100 pb-3">
+                            <div class="flex gap-2">
+                                <button onclick="switchScaleForm('GAD7')" id="btn-scale-gad7" class="px-3 py-1.5 rounded-lg text-xs font-bold bg-sage-600 text-white">GAD-7 (Ansiedade)</button>
+                                <button onclick="switchScaleForm('PHQ9')" id="btn-scale-phq9" class="px-3 py-1.5 rounded-lg text-xs font-bold bg-sand-100 text-slate-700">PHQ-9 (Depressão)</button>
+                            </div>
+                            <span class="text-[11px] text-slate-400">Últimas 2 semanas (0 a 3)</span>
+                        </div>
+
+                        <div id="scale-questions-container" class="space-y-2.5 text-xs max-h-96 overflow-y-auto pr-2 custom-scrollbar"></div>
+
+                        <div class="p-4 rounded-xl bg-sage-50 border border-sage-200 flex items-center justify-between">
+                            <div>
+                                <span class="text-[11px] uppercase font-bold text-sage-700">Pontuação Calculada</span>
+                                <div class="text-xl font-extrabold text-sage-900" id="scale-live-score">0 pontos — Mínima</div>
+                            </div>
+                            <button onclick="saveScaleEvaluation()" class="px-4 py-2 bg-sage-600 hover:bg-sage-700 text-white rounded-xl text-xs font-bold shadow-sm">
+                                Registar Avaliação no Dossier
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- Gráfico SVG de Evolução Clínica & Histórico -->
+                    <div class="bg-white rounded-2xl border border-sand-200 p-5 shadow-sm space-y-4 flex flex-col justify-between">
+                        <div>
+                            <h4 class="font-bold text-sm text-slate-800 mb-1">Curva de Evolução Sintomática do Paciente</h4>
+                            <p class="text-xs text-slate-500 mb-4">Visualização longitudinal das pontuações registadas em consulta</p>
+                            <div id="scale-chart-box" class="bg-sand-50 rounded-xl border border-sand-200 p-4 h-56 flex items-center justify-center"></div>
+                        </div>
+                        <div>
+                            <h5 class="font-bold text-xs uppercase text-slate-500 mb-2">Histórico de Avaliações</h5>
+                            <div id="scale-history-list" class="space-y-1.5 text-xs max-h-44 overflow-y-auto"></div>
+                        </div>
+            <!-- ==================== VISTA 5: HONORÁRIOS SESSÃO A SESSÃO & CONTROLO FISCAL AT ==================== -->
+            <section id="view-financeiro" class="tab-view hidden space-y-6">
+                <div class="bg-white rounded-2xl border border-sand-200 p-5 shadow-sm flex flex-wrap items-center justify-between gap-4">
+                    <div>
+                        <h3 class="font-bold text-base text-slate-800">Controlo Financeiro Sessão a Sessão & Reconciliação de Recibos Verdes (AT)</h3>
+                        <p class="text-xs text-slate-500">Gestão individual por consulta realizada ou falta (<24h). Copie o NIF com 1 clique para emitir o recibo no Portal das Finanças.</p>
+                    </div>
+                    <div class="flex flex-wrap items-center gap-2">
+                        <button onclick="openModalNovoPagamento()" class="px-3.5 py-1.5 rounded-xl text-xs font-bold bg-sage-800 text-white hover:bg-sage-900 flex items-center gap-1">
+                            <i data-lucide="plus" class="w-3.5 h-3.5"></i> Registar Sessão / Cobrança
+                        </button>
+                        <button onclick="filterFinance('ALL')" id="fin-filter-all" class="px-3 py-1.5 rounded-lg text-xs font-bold bg-sage-600 text-white">Todas as Sessões</button>
+                        <button onclick="filterFinance('PENDING_AT')" id="fin-filter-at" class="px-3 py-1.5 rounded-lg text-xs font-bold bg-rose-50 text-rose-700 border border-rose-200">Falta Emitir Recibo AT</button>
+                        <button onclick="filterFinance('UNPAID')" id="fin-filter-unpaid" class="px-3 py-1.5 rounded-lg text-xs font-bold bg-amber-50 text-amber-800 border border-amber-200">Pagamentos Pendentes</button>
+                    </div>
+                </div>
+
+                <!-- Resumo de Métricas Financeiras e Assiduidade -->
+                <div id="finance-summary-grid" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4"></div>
+
+                <!-- Tabela de Faturação Sessão a Sessão e Recibos AT -->
+                <div class="bg-white rounded-2xl border border-sand-200 shadow-sm overflow-hidden">
+                    <table class="w-full text-left border-collapse text-xs">
+                        <thead>
+                            <tr class="bg-sand-50 border-b border-sand-200 text-[10px] uppercase font-bold text-slate-500">
+                                <th class="py-3 px-4">Data</th>
+                                <th class="py-3 px-4">Paciente</th>
+                                <th class="py-3 px-4">NIF (Portal das Finanças)</th>
+                                <th class="py-3 px-4">Descrição da Sessão</th>
+                                <th class="py-3 px-4">Honorários (€)</th>
+                                <th class="py-3 px-4">Estado Pagamento</th>
+                                <th class="py-3 px-4 text-right">Recibo Verde (AT)</th>
+                            </tr>
+                        </thead>
+                        <tbody id="finance-table-body" class="divide-y divide-sand-100"></tbody>
+                    </table>
+                </div>
+            </section>
+
+            <!-- ==================== VISTA 6: BIBLIOTECA DE RECURSOS & TPCs ==================== -->
+            <section id="view-recursos" class="tab-view hidden space-y-6">
+                <div class="bg-white rounded-2xl border border-sand-200 p-5 shadow-sm flex flex-wrap items-center justify-between gap-4">
+                    <div>
+                        <h3 class="font-bold text-base text-slate-800">Biblioteca de Recursos Terapêuticos, Psicoeducação & Exercícios</h3>
+                        <p class="text-xs text-slate-500">Materiais prontos a prescrever/enviar aos pacientes e registo de partilha</p>
+                    </div>
+                    <button onclick="openModalNovoRecurso()" class="px-4 py-2 bg-sage-600 hover:bg-sage-700 text-white rounded-xl text-xs font-bold flex items-center gap-1.5">
+                        <i data-lucide="plus" class="w-4 h-4"></i> Adicionar Recurso / Ficha
+                    </button>
+                </div>
+
+                <div id="resources-grid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4"></div>
+            </section>
+
+            <!-- ==================== VISTA 7: LISTA DE ESPERA & TRIAGEM ==================== -->
+            <section id="view-espera" class="tab-view hidden space-y-6">
+                <div class="bg-white rounded-2xl border border-sand-200 p-5 shadow-sm flex flex-wrap items-center justify-between gap-4">
+                    <div>
+                        <h3 class="font-bold text-base text-slate-800">Lista de Espera & Triagem de Novos Pedidos</h3>
+                        <p class="text-xs text-slate-500">Registe contactos recebidos por Instagram, Email ou recomendação e converta em Paciente Ativo quando abrir vaga</p>
+                    </div>
+                    <button onclick="openModalListaEspera()" class="px-4 py-2 bg-sage-600 hover:bg-sage-700 text-white rounded-xl text-xs font-bold flex items-center gap-1.5">
+                        <i data-lucide="user-plus" class="w-4 h-4"></i> Registar Pedido na Lista de Espera
+                    </button>
+                </div>
+
+                <div class="bg-white rounded-2xl border border-sand-200 shadow-sm overflow-hidden">
+                    <table class="w-full text-left border-collapse text-xs">
+                        <thead>
+                            <tr class="bg-sand-50 border-b border-sand-200 text-[10px] uppercase font-bold text-slate-500">
+                                <th class="py-3 px-4">Data Pedido</th>
+                                <th class="py-3 px-4">Nome & Contacto</th>
+                                <th class="py-3 px-4">Motivo / Pedido Inicial</th>
+                                <th class="py-3 px-4">Disponibilidade Preferencial</th>
+                                <th class="py-3 px-4">Prioridade</th>
+                                <th class="py-3 px-4 text-right">Converter</th>
+                            </tr>
+                        </thead>
+                        <tbody id="waitlist-table-body" class="divide-y divide-sand-100"></tbody>
+                    </table>
+                </div>
+            </section>
+
+            <!-- ==================== VISTA 8: EMISSOR DE DOCUMENTOS CLÍNICOS OFICIAIS ==================== -->
+            <section id="view-documentos" class="tab-view hidden space-y-6">
+                <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+                    <div class="bg-white rounded-2xl border border-sand-200 p-5 shadow-sm space-y-4">
+                        <h3 class="font-bold text-sm text-slate-800 flex items-center gap-2">
+                            <i data-lucide="file-badge" class="w-4 h-4 text-sage-600"></i> Gerador de Documentos Oficiais
+                        </h3>
+                        <div class="space-y-3 text-xs">
+                            <div>
+                                <label class="block font-semibold text-slate-700 mb-1">Selecionar Modelo</label>
+                                <select id="doc-template-select" onchange="generateDocumentPreview()" class="w-full p-2.5 border border-sand-200 rounded-xl bg-sand-50 font-semibold">
+                                    <option value="PRESENCA">1. Declaração de Presença em Consulta (Sigilosa)</option>
+                                    <option value="CONSENTIMENTO">2. Consentimento Informado para Telepsicologia (OPP / RGPD)</option>
+                                    <option value="RELATORIO">3. Relatório de Acompanhamento Psicológico / Encaminhamento</option>
+                                </select>
+                            </div>
+                            <div>
+                                <label class="block font-semibold text-slate-700 mb-1">Paciente</label>
+                                <select id="doc-patient-select" onchange="generateDocumentPreview()" class="w-full p-2.5 border border-sand-200 rounded-xl bg-white font-semibold"></select>
+                            </div>
+                            <div class="grid grid-cols-2 gap-2">
+                                <div>
+                                    <label class="block font-semibold text-slate-700 mb-1">Data</label>
+                                    <input type="date" id="doc-date" onchange="generateDocumentPreview()" class="w-full p-2 border border-sand-200 rounded-xl">
+                                </div>
+                                <div>
+                                    <label class="block font-semibold text-slate-700 mb-1">Horário</label>
+                                    <input type="text" id="doc-hours" value="15h00 às 15h50" oninput="generateDocumentPreview()" class="w-full p-2 border border-sand-200 rounded-xl">
+                                </div>
+                            </div>
+                            <button onclick="printClinicalDocument()" class="w-full py-2.5 bg-sage-600 hover:bg-sage-700 text-white rounded-xl font-bold flex items-center justify-center gap-2 shadow-sm">
+                                <i data-lucide="printer" class="w-4 h-4"></i> Imprimir / Guardar em PDF
+                            </button>
+                        </div>
+                    </div>
+
+                    <div class="lg:col-span-2 bg-white rounded-2xl border border-sand-200 p-6 shadow-sm space-y-3">
+                        <div class="flex items-center justify-between">
+                            <span class="text-xs font-bold uppercase text-slate-400">Pré-visualização Editável antes de Imprimir</span>
+                            <span class="text-[11px] text-sage-700">Cabeçalho profissional incluído automaticamente no PDF</span>
+                        </div>
+                        <textarea id="doc-editor-textarea" rows="16" class="w-full p-4 border border-sand-200 rounded-xl bg-sand-50/50 text-xs leading-relaxed font-sans focus:bg-white focus:outline-none"></textarea>
+                    </div>
+                </div>
+            </section>
+
+            <!-- ==================== VISTA 9: CONFIGURAÇÕES, PERFIL OPP & BACKUP SOBERANO ==================== -->
+            <section id="view-config" class="tab-view hidden space-y-6">
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <!-- Dados Profissionais da Psicóloga -->
+                    <div class="bg-white rounded-2xl border border-sand-200 p-6 shadow-sm space-y-4">
+                        <h3 class="font-bold text-base text-slate-800 flex items-center gap-2">
+                            <i data-lucide="user-check" class="w-5 h-5 text-sage-600"></i> Identificação Profissional (Cabeçalho de Documentos)
+                        </h3>
+                        <form onsubmit="saveProfileConfig(event)" class="space-y-3 text-xs">
+                            <div class="grid grid-cols-2 gap-3">
+                                <div>
+                                    <label class="block font-semibold text-slate-700 mb-1">Nome Profissional</label>
+                                    <input type="text" id="cfg-name" required class="w-full p-2.5 border border-sand-200 rounded-xl">
+                                </div>
+                                <div>
+                                    <label class="block font-semibold text-slate-700 mb-1">N.º Cédula Profissional OPP</label>
+                                    <input type="text" id="cfg-opp" required class="w-full p-2.5 border border-sand-200 rounded-xl">
+                                </div>
+                                <div>
+                                    <label class="block font-semibold text-slate-700 mb-1">Email Profissional</label>
+                                    <input type="email" id="cfg-email" class="w-full p-2.5 border border-sand-200 rounded-xl">
+                                </div>
+                                <div>
+                                    <label class="block font-semibold text-slate-700 mb-1">Contacto / WhatsApp</label>
+                                    <input type="text" id="cfg-phone" class="w-full p-2.5 border border-sand-200 rounded-xl">
+                                </div>
+                                <div>
+                                    <label class="block font-semibold text-slate-700 mb-1">Honorários Padrão por Sessão (€)</label>
+                                    <input type="number" step="0.01" id="cfg-price-single" class="w-full p-2.5 border border-sand-200 rounded-xl">
+                                </div>
+                                <div>
+                                    <label class="block font-semibold text-slate-700 mb-1">PIN de Bloqueio de Ecrã</label>
+                                    <input type="text" id="cfg-pin" maxlength="6" class="w-full p-2.5 border border-sand-200 rounded-xl font-mono">
+                                </div>
+                            </div>
+                            <button type="submit" class="px-5 py-2.5 bg-sage-600 hover:bg-sage-700 text-white rounded-xl font-bold">
+                                Guardar Dados Profissionais
+                            </button>
+                        </form>
+                    </div>
+
+                    <!-- Salvaguarda e Soberania de Dados RGPD -->
+                    <div class="bg-white rounded-2xl border border-sand-200 p-6 shadow-sm space-y-4">
+                        <h3 class="font-bold text-base text-slate-800 flex items-center gap-2">
+                            <i data-lucide="hard-drive-download" class="w-5 h-5 text-sage-600"></i> Salvaguarda Soberana de Dados (RGPD)
+                        </h3>
+                        <p class="text-xs text-slate-600 leading-relaxed">
+                            Para garantir o sigilo absoluto dos dados clínicos, esta aplicação guarda toda a informação localmente no seu equipamento (sem servidores externos). Recomenda-se descarregar regularmente uma cópia de segurança em formato <code>.json</code>.
+                        </p>
+                        <div class="flex flex-wrap gap-3 pt-2">
+                            <button onclick="exportBackupJSON()" class="px-4 py-2.5 bg-sage-600 hover:bg-sage-700 text-white rounded-xl text-xs font-bold flex items-center gap-1.5">
+                                <i data-lucide="download" class="w-4 h-4"></i> Exportar Backup (.JSON)
+                            </button>
+                            <label class="px-4 py-2.5 bg-slate-800 hover:bg-slate-900 text-white rounded-xl text-xs font-bold cursor-pointer flex items-center gap-1.5">
+                                <i data-lucide="upload" class="w-4 h-4"></i> Restaurar Backup (.JSON)
+                                <input type="file" accept=".json" class="hidden" onchange="importBackupJSON(event)">
+                            </label>
+                        </div>
+                        <div class="pt-4 border-t border-sand-200 flex gap-3">
+                            <button onclick="resetToDemoData()" class="px-3.5 py-2 border border-sand-200 hover:bg-sand-100 rounded-xl text-xs font-semibold text-slate-700">
+                                Repor Pacientes de Demonstração
+                            </button>
+                            <button onclick="clearAllForProduction()" class="px-3.5 py-2 border border-rose-200 hover:bg-rose-50 rounded-xl text-xs font-semibold text-rose-700">
+                                Limpar Tudo (Começar Consultório do Zero)
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+        </main>
+    </div>
+
+    <!-- ==================== MODAL GENÉRICO PARA NOVOS REGISTOS ==================== -->
+    <div id="modal-generic" class="fixed inset-0 bg-sage-950/60 backdrop-blur-sm hidden items-center justify-center z-40 p-4 no-print">
+        <div class="bg-white rounded-2xl max-w-xl w-full p-6 shadow-2xl border border-sand-200 space-y-4 max-h-[90vh] overflow-y-auto custom-scrollbar">
+            <div class="flex items-center justify-between border-b border-sand-100 pb-3">
+                <h3 id="modal-title" class="font-serif-clinical text-xl font-bold text-sage-900">Novo Registo</h3>
+                <button onclick="closeModal()" class="text-slate-400 hover:text-slate-600"><i data-lucide="x" class="w-5 h-5"></i></button>
+            </div>
+            <form id="modal-form" onsubmit="submitModalForm(event)" class="space-y-3.5 text-xs"></form>
+        </div>
+    </div>
+
+    <!-- ==================== ÁREA DE IMPRESSÃO OFICIAL ==================== -->
+    <div id="print-container" class="hidden"></div>
+
+    <!-- ==================== CAIXA DE NOTIFICAÇÃO / TOAST ==================== -->
+    <div id="toast-notification" class="fixed bottom-5 right-5 z-50 hidden bg-sage-900 text-white px-4 py-3 rounded-xl shadow-lg border border-sage-700 text-xs font-medium items-center gap-2 no-print">
+        <i data-lucide="check-circle-2" class="w-4 h-4 text-emerald-400"></i>
+        <span id="toast-message">Operação concluída</span>
+    </div>
+
+    <!-- ==================== MOTOR JAVASCRIPT PSISTUDIO ==================== -->
+    <script>
+        const STORAGE_KEY = 'PSISTUDIO_CLAUDIA_MESQUITA_V2_SINGLE';
+        let privacyMode = false;
+        let selectedPatientId = 'P01';
+        let currentScaleType = 'GAD7';
+        let financeFilter = 'ALL';
+
+        // Timer de Sessão (50 minutos)
+        let timerSeconds = 0;
+        let timerInterval = null;
+
+        function showToast(msg) {
+            const toast = document.getElementById('toast-notification');
+            document.getElementById('toast-message').textContent = msg;
+            toast.classList.remove('hidden');
+            toast.classList.add('flex');
+            setTimeout(() => {
+                toast.classList.add('hidden');
+                toast.classList.remove('flex');
+            }, 3200);
+        }
+
+        function copyTextToClipboard(text, label) {
+            const temp = document.createElement('textarea');
+            temp.value = text;
+            document.body.appendChild(temp);
+            temp.select();
+            document.execCommand('copy');
+            document.body.removeChild(temp);
+            showToast(label || `Copiado: ${text}`);
+        }
+
+        const GAD7_ITEMS = [
+            "1. Sentir-se nervoso(a), ansioso(a) ou muito tenso(a)",
+            "2. Não ser capaz de impedir ou de controlar as preocupações",
+            "3. Preocupar-se demasiado com diferentes coisas",
+            "4. Dificuldade em relaxar",
+            "5. Sentir-se tão inquieto(a) que lhe é difícil ficar parado(a)",
+            "6. Tornar-se facilmente aborrecido(a) ou irritável",
+            "7. Sentir medo como se algo horrível fosse acontecer"
+        ];
+
+        const PHQ9_ITEMS = [
+            "1. Pouco interesse ou prazer em fazer as coisas",
+            "2. Sentir-se em baixo, deprimido(a) ou sem esperança",
+            "3. Dificuldade em adormecer ou em dormir sem interrupções, ou dormir demais",
+            "4. Sentir-se cansado(a) ou ter pouca energia",
+            "5. Falta de apetite ou comer em excesso",
+            "6. Sentir-se mal consigo próprio(a) ou que é um fracasso",
+            "7. Dificuldade em concentrar-se nas coisas (ex: ler ou ver televisão)",
+            "8. Movimentar-se ou falar tão lentamente que os outros notaram (ou o oposto: agitado)",
+            "9. Pensamentos de que estaria melhor morto(a) ou de se magoar de alguma forma"
+        ];
+
+        const INITIAL_DEMO_DATA = {
+            profile: {
+                name: "Cláudia Mesquita",
+                opp: "OPP n.º 24890",
+                email: "claudia.mesquita.psi@email.pt",
+                phone: "912 345 678",
+                priceSingle: 50,
+                pin: "1234"
+            },
+            patients: [
+                {
+                    id: "P01",
+                    code: "#P01",
+                    name: "Sofia Marques Ribeiro",
+                    birthDate: "1992-05-14",
+                    nif: "254891320",
+                    phone: "918273645",
+                    email: "sofia.ribeiro@email.pt",
+                    onlineLocation: "Rua Direita, n.º 45, 3.º Esq., Viseu (Domicílio)",
+                    emergencyContact: "Tiago Ribeiro (Marido) — 919 888 777",
+                    consentSigned: true,
+                    riskLevel: "Atenção",
+                    sessionFee: 50,
+                    modality: "Telepsicologia (Online)",
+                    videoLink: "https://meet.google.com/abc-defg-hij",
+                    sharedResources: ["Registo de Pensamentos Disfuncionais (RPD)", "Protocolo de Higiene do Sono & Controlo de Estímulos"],
+                    anamnese: {
+                        motivo: "Sintomatologia ansiosa acentuada, exaustão laboral (burnout) e ataques de pânico episódicos ao domingo à noite.",
+                        medicacao: "Escitalopram 10mg (manhã) prescrito pelo Médico de Família; SOS Alprazolam 0.25mg.",
+                        sono: "Insónia intermédia (despertares às 04h00 com ruminação antecipatória sobre o trabalho).",
+                        genograma: "Marido: Tiago (35 anos, engenheiro, apoiante) | Filha: Clara (4 anos) | Mãe: Helena (crítica e exigente)."
+                    },
+                    fourPs: {
+                        predisponentes: "Traços de perfeccionismo elevado desde a infância; vinculação materna assente no desempenho.",
+                        precipitantes: "Mudança de direção na empresa há 4 meses com duplicação de responsabilidades sem apoio.",
+                        manutencao: "Hipervigilância somática, dificuldade em dizer 'não', verificação de emails fora de horas e evitamento de pausas.",
+                        protetores: "Excelente capacidade de insight, relação conjugal segura, adesão elevada às tarefas terapêuticas."
+                    },
+                    objectives: [
+                        { text: "Reduzir frequência de ataques de pânico e hiperventilação através de regulação autonómica", status: "Alcançado" },
+                        { text: "Estabelecer limites claros no horário laboral (desligar notificações às 18h30)", status: "Em trabalho" },
+                        { text: "Trabalhar crença nuclear de desvalor e hiper-responsabilidade", status: "Em trabalho" }
+                    ],
+                    sessions: [
+                        {
+                            num: 1,
+                            date: "2026-10-05",
+                            mood: 4,
+                            themes: "Colheita de história clínica e validação do quadro de exaustão. Explicação do ciclo cognitivo do pânico.",
+                            intervention: "Psicoeducação sobre resposta de luta/fuga e introdução à respiração diafragmática.",
+                            tpc: "Registo diário de episódios de ansiedade (gatilho, pensamento, emoção 0-10).",
+                            nextTopics: "Rever autorregistos da semana e analisar padrões no trabalho."
+                        },
+                        {
+                            num: 2,
+                            date: "2026-10-12",
+                            mood: 6,
+                            themes: "Trouxe o registo completo. Identificou que o pico de ansiedade surge quando recebe mensagens da chefia ao fim do dia.",
+                            intervention: "Reestruturação cognitiva da leitura mental e catastrofização.",
+                            tpc: "Adiar resposta a emails não urgentes após as 18h00 + Higiene do sono.",
+                            nextTopics: "Explorar culpa associada a impor limites (relação com exigência materna)."
+                        }
+                    ],
+                    scales: [
+                        { date: "2026-09-28", type: "GAD-7", score: 16, label: "Ansiedade Severa" },
+                        { date: "2026-10-12", type: "GAD-7", score: 11, label: "Ansiedade Moderada" },
+                        { date: "2026-10-19", type: "GAD-7", score: 7, label: "Ansiedade Ligeira" }
+                    ]
+                },
+                {
+                    id: "P02",
+                    code: "#P02",
+                    name: "Diogo Vasconcelos Pinto",
+                    birthDate: "1998-11-03",
+                    nif: "268901445",
+                    phone: "934556677",
+                    email: "diogo.vpinto@email.pt",
+                    onlineLocation: "Av. da República, Coimbra (Quarto/Apartamento)",
+                    emergencyContact: "Margarida Pinto (Mãe) — 961 223 344",
+                    consentSigned: true,
+                    riskLevel: "Sem Risco",
+                    sessionFee: 50,
+                    modality: "Telepsicologia (Online)",
+                    videoLink: "https://meet.google.com/xyz-uvwx-rst",
+                    sharedResources: ["Protocolo de Higiene do Sono & Controlo de Estímulos"],
+                    anamnese: {
+                        motivo: "Procrastinação académica severa na dissertação de mestrado, bloqueio de escrita e isolamento social.",
+                        medicacao: "Sem medicação psiquiátrica ativa.",
+                        sono: "Inversão de ciclo de sono (deita-se às 03h30, acorda às 11h30).",
+                        genograma: "Pais separados; vive sozinho; namorada à distância (Porto)."
+                    },
+                    fourPs: {
+                        predisponentes: "Medo intenso de avaliação negativa e intolerância à incerteza.",
+                        precipitantes: "Prazo final de entrega da tese a 3 meses.",
+                        manutencao: "Evitamento experiencial através de videojogos/redes sociais para aliviar ansiedade imediata (reforço negativo).",
+                        protetores: "Elevadas capacidades cognitivas, bom suporte da namorada."
+                    },
+                    objectives: [
+                        { text: "Regularizar ciclo circadiano (acordar até às 09h00)", status: "Alcançado" },
+                        { text: "Aplicar blocos de exposição graduada à escrita (técnica Pomodoro 25 min sem julgamento)", status: "Em trabalho" }
+                    ],
+                    sessions: [
+                        {
+                            num: 1,
+                            date: "2026-10-15",
+                            mood: 6,
+                            themes: "Análise funcional do ciclo de procrastinação (ansiedade -> evitamento -> alívio curto prazo -> culpa).",
+                            intervention: "Ativação comportamental e divisão de tarefas em micro-objetivos.",
+                            tpc: "Escrever apenas 20 minutos por dia às 10h00 sem editar.",
+                            nextTopics: "Avaliar cumprimento dos blocos de escrita e autocrítica."
+                        }
+                    ],
+                    scales: [
+                        { date: "2026-10-01", type: "PHQ-9", score: 13, label: "Moderada" },
+                        { date: "2026-10-15", type: "PHQ-9", score: 8, label: "Ligeira" }
+                    ]
+                },
+                {
+                    id: "P03",
+                    code: "#P03",
+                    name: "Inês Catarina Monteiro",
+                    birthDate: "1985-02-20",
+                    nif: "219445882",
+                    phone: "926112233",
+                    email: "ines.monteiro@email.pt",
+                    onlineLocation: "Quinta da Alagoa, Viseu",
+                    emergencyContact: "Pedro Monteiro (Irmão) — 914 009 988",
+                    consentSigned: true,
+                    riskLevel: "Monitorização Ativa",
+                    sessionFee: 50,
+                    modality: "Telepsicologia (Online)",
+                    videoLink: "https://meet.google.com/ine-smon-tei",
+                    sharedResources: ["Técnica de Grounding Sensorial 5-4-3-2-1 & Respiração Diafragmática"],
+                    anamnese: {
+                        motivo: "Processo de luto complicado após perda parental e reconfiguração familiar.",
+                        medicacao: "Sertralina 50mg + Trazodona 50mg SOS.",
+                        sono: "Sono fragmentado, mas com melhoria progressiva.",
+                        genograma: "Irmão Pedro (grande suporte); divorciada há 2 anos; sem filhos."
+                    },
+                    fourPs: {
+                        predisponentes: "Papel de cuidadora principal durante doença prolongada.",
+                        precipitantes: "Falecimento paterno há 5 meses.",
+                        manutencao: "Sentimentos de culpa do sobrevivente e perda de rotinas estruturantes.",
+                        protetores: "Rede de amigos presente, retoma gradual de caminhadas e expressão emocional fluida."
+                    },
+                    objectives: [
+                        { text: "Processamento dual do luto (oscilação saudável entre perda e restauração)", status: "Em trabalho" },
+                        { text: "Retomar uma atividade prazerosa semanal fora de casa", status: "Alcançado" }
+                    ],
+                    sessions: [
+                        {
+                            num: 1,
+                            date: "2026-10-18",
+                            mood: 5,
+                            themes: "Trabalhada a data de aniversário que se aproxima e rituais de homenagem.",
+                            intervention: "Carta terapêutica de continuidade de vínculo e validação emocional.",
+                            tpc: "Planeamento do fim de semana com o irmão.",
+                            nextTopics: "Balanço da evolução emocional e continuidade da rede de suporte."
+                        }
+                    ],
+                    scales: [
+                        { date: "2026-09-15", type: "PHQ-9", score: 17, label: "Moderadamente Severa" },
+                        { date: "2026-10-18", type: "PHQ-9", score: 11, label: "Moderada" }
+                    ]
+                }
+            ],
+            agenda: [
+                { id: "AG01", date: "2026-10-26", time: "10:00", patientId: "P01", type: "Consulta Online (50,00 €)", status: "Realizada" },
+                { id: "AG02", date: "2026-10-26", time: "14:30", patientId: "P02", type: "Consulta Online (50,00 €)", status: "Agendada" },
+                { id: "AG03", date: "2026-10-26", time: "16:30", patientId: "P03", type: "Consulta Online (50,00 €)", status: "Agendada" }
+            ],
+            payments: [
+                { id: "FIN01", date: "2026-10-12", patientId: "P01", desc: "Sessão Clínica n.º 2 (Online)", amount: 50, status: "Pago MBWay", reciboAT: true },
+                { id: "FIN02", date: "2026-10-15", patientId: "P02", desc: "Sessão Clínica n.º 1 (Online)", amount: 50, status: "Pago MBWay", reciboAT: false },
+                { id: "FIN03", date: "2026-10-18", patientId: "P03", desc: "Sessão Clínica n.º 1 (Online)", amount: 50, status: "Pago Transferência", reciboAT: false },
+                { id: "FIN04", date: "2026-10-26", patientId: "P01", desc: "Sessão Clínica n.º 3 (Online)", amount: 50, status: "Pendente", reciboAT: false }
+            ],
+            resources: [
+                { id: "R01", title: "Registo de Pensamentos Disfuncionais (RPD)", category: "TCC / Ansiedade", desc: "Tabela de 5 colunas: Situação, Emoção (0-100%), Pensamento Automático, Evidências e Pensamento Alternativo.", sharedCount: 8 },
+                { id: "R02", title: "Protocolo de Higiene do Sono & Controlo de Estímulos", category: "Sono / Insónia", desc: "Guia prático de rotinas noturnas, restrição de ecrãs e técnica dos 20 minutos fora da cama.", sharedCount: 5 },
+                { id: "R03", title: "Técnica de Grounding Sensorial 5-4-3-2-1 & Respiração Diafragmática", category: "Pânico / Regulação", desc: "Ancoragem no presente para momentos de dissociação ou crise de ansiedade aguda.", sharedCount: 11 },
+                { id: "R04", title: "Mapa de Limites Saudáveis & Comunicação Assertiva (DEAR MAN)", category: "Burnout / Relacional", desc: "Guião passo a passo para formular pedidos e dizer 'não' sem culpa excessiva.", sharedCount: 6 }
+            ],
+            waitlist: [
+                { id: "W01", date: "2026-10-22", name: "Marta Lourenço", contact: "917 444 333", reason: "Ansiedade generalizada e ataques de pânico", preference: "Pós-Laboral (18h-20h)", priority: "Alta" },
+                { id: "W02", date: "2026-10-24", name: "André Filipe Sousa", contact: "963 111 222", reason: "Dificuldades de adaptação e stress profissional", preference: "Manhãs (09h-12h)", priority: "Normal" }
+            ]
+        };
+
+        let db = loadDB();
+
+        function loadDB() {
+            const saved = localStorage.getItem(STORAGE_KEY);
+            if (!saved) {
+                localStorage.setItem(STORAGE_KEY, JSON.stringify(INITIAL_DEMO_DATA));
+                return JSON.parse(JSON.stringify(INITIAL_DEMO_DATA));
+            }
+            try { return JSON.parse(saved); } catch { return JSON.parse(JSON.stringify(INITIAL_DEMO_DATA)); }
+        }
+
+        function saveDB() {
+            localStorage.setItem(STORAGE_KEY, JSON.stringify(db));
+            renderAll();
+        }
+
+        // ==================== FORMATADORES DE PRIVACIDADE (BLUR / INICIAIS) ====================
+        function displayPatientName(p) {
+            if (!p) return "Paciente";
+            if (!privacyMode) return p.name;
+            const parts = p.name.trim().split(" ");
+            const first = parts[0];
+            const lastInitial = parts.length > 1 ? parts[parts.length - 1][0] + "." : "";
+            return `${first} ${lastInitial} (${p.code})`;
+        }
+
+        function togglePrivacyMode() {
+            privacyMode = !privacyMode;
+            const pill = document.getElementById('privacy-active-pill');
+            if (privacyMode) {
+                pill.classList.remove('hidden');
+                pill.classList.add('inline-flex');
+            } else {
+                pill.classList.add('hidden');
+                pill.classList.remove('inline-flex');
+            }
+            renderAll();
+            applyBlurClasses();
+        }
+
+        function applyBlurClasses() {
+            document.querySelectorAll('.sensitive-note, .sensitive-data').forEach(el => {
+                if (privacyMode) el.classList.add('privacy-blur');
+                else el.classList.remove('privacy-blur');
+            });
+        }
+
+        // Tecla ESC ativa/desativa Modo Privacidade
+        window.addEventListener('keydown', (e) => {
+            if (e.key === 'Escape') {
+                const modal = document.getElementById('modal-generic');
+                if (!modal.classList.contains('hidden')) {
+                    closeModal();
+                } else {
+                    togglePrivacyMode();
+                }
+            }
+        });
+
+        // ==================== BLOQUEIO POR PIN ====================
+        function lockScreen() {
+            document.getElementById('pin-input').value = '';
+            document.getElementById('pin-error').classList.add('hidden');
+            const lock = document.getElementById('pin-lock-screen');
+            lock.classList.remove('hidden');
+            lock.classList.add('flex');
+        }
+
+        function unlockWithPin() {
+            const val = document.getElementById('pin-input').value;
+            if (val === (db.profile.pin || '1234')) {
+                const lock = document.getElementById('pin-lock-screen');
+                lock.classList.add('hidden');
+                lock.classList.remove('flex');
+            } else {
+                document.getElementById('pin-error').classList.remove('hidden');
+            }
+        }
+
+        // ==================== NAVEGAÇÃO ENTRE ABAS ====================
+        function switchTab(tabId) {
+            document.querySelectorAll('.tab-view').forEach(el => el.classList.add('hidden'));
+            const target = document.getElementById('view-' + tabId);
+            if (target) target.classList.remove('hidden');
+
+            document.querySelectorAll('.nav-btn').forEach(btn => {
+                btn.classList.remove('bg-sage-600', 'text-white', 'shadow-sm');
+                btn.classList.add('text-sage-200');
+            });
+            const activeBtn = document.getElementById('nav-' + tabId);
+            if (activeBtn) {
+                activeBtn.classList.remove('text-sage-200');
+                activeBtn.classList.add('bg-sage-600', 'text-white', 'shadow-sm');
+            }
+
+            const titles = {
+                agenda: "Painel do Dia & Agenda de Telepsicologia",
+                sessao: "Cockpit de Consulta Ao Vivo (50 min)",
+                pacientes: "Dossiers Clínicos & Conceptualização de Caso (4Ps)",
+                escalas: "Avaliação Psicométrica (PHQ-9 & GAD-7)",
+                financeiro: "Controlo Financeiro Sessão a Sessão & Recibos Verdes (AT)",
+                recursos: "Biblioteca de Recursos Terapêuticos & TPCs",
+                espera: "Lista de Espera & Triagem Inicial",
+                documentos: "Emissão de Declarações, Consentimentos & Relatórios",
+                config: "Configurações Profissionais OPP & Salvaguarda RGPD"
+            };
+            document.getElementById('topbar-title').textContent = titles[tabId] || "PsiStudio";
+            renderAll();
+        }
+
+        // ==================== RENDERIZAÇÃO GLOBAL ====================
+        function renderAll() {
+            // Atualizar Sidebar
+            document.getElementById('sidebar-prof-name').textContent = db.profile.name;
+            document.getElementById('sidebar-prof-opp').textContent = db.profile.opp;
+            document.getElementById('badge-hoje').textContent = db.agenda.length;
+            document.getElementById('badge-pacientes').textContent = db.patients.length;
+            document.getElementById('badge-espera').textContent = db.waitlist.length;
+
+            const pendingAT = db.payments.filter(p => p.status.startsWith('Pago') && !p.reciboAT).length;
+            document.getElementById('badge-recibos').textContent = pendingAT;
+
+            renderAgendaView();
+            populatePatientSelects();
+            loadLiveSessionPatient(document.getElementById('live-patient-select').value || selectedPatientId);
+            renderPatientsList();
+            renderPatientDossier(selectedPatientId);
+            renderScalesView();
+            renderFinanceView();
+            renderResourcesView();
+            renderWaitlistView();
+            generateDocumentPreview();
+            loadProfileForm();
+
+            applyBlurClasses();
+            lucide.createIcons();
+        }
+
+        // ==================== 1. AGENDA & PAINEL DO DIA ====================
+        function renderAgendaView() {
+            document.getElementById('kpi-agenda-total').textContent = db.agenda.length;
+            const horasSemana = db.agenda.length + 11; // estimativa visual + sessões registadas
+            document.getElementById('kpi-horas-semana').textContent = horasSemana + "h / sem";
+
+            let recebido = 0, pendente = 0;
+            db.payments.forEach(p => {
+                if (p.status.startsWith('Pago')) recebido += Number(p.amount);
+                else pendente += Number(p.amount);
+            });
+            document.getElementById('kpi-receita-mes').textContent = recebido.toFixed(2) + " €";
+            document.getElementById('kpi-receita-pendente').textContent = "Pendente: " + pendente.toFixed(2) + " €";
+
+            const pendingAT = db.payments.filter(p => p.status.startsWith('Pago') && !p.reciboAT).length;
+            document.getElementById('kpi-recibos-pendentes').textContent = pendingAT;
+
+            const tbody = document.getElementById('agenda-table-body');
+            tbody.innerHTML = db.agenda.map((ag, idx) => {
+                const p = db.patients.find(x => x.id === ag.patientId);
+                const pName = displayPatientName(p);
+                const statusColor = ag.status === 'Realizada'
+                    ? 'bg-emerald-100 text-emerald-800'
+                    : ag.status.includes('Falta') ? 'bg-rose-100 text-rose-800' : 'bg-sage-100 text-sage-800';
+
+                return `
+                    <tr class="hover:bg-sand-50">
+                        <td class="py-3.5 px-4">
+                            <div class="font-bold text-slate-800">${ag.time}</div>
+                            <div class="text-[11px] text-slate-400">${ag.date}</div>
+                        </td>
+                        <td class="py-3.5 px-4">
+                            <button onclick="openPatientFromAgenda('${ag.patientId}')" class="font-bold text-sage-900 hover:underline text-left">${pName}</button>
+                            <div class="text-[10px] text-slate-400">${p ? p.code : ''}</div>
+                        </td>
+                        <td class="py-3.5 px-4">
+                            <span class="font-medium text-slate-700">${ag.type}</span>
+                        </td>
+                        <td class="py-3.5 px-4">
+                            <select onchange="changeAgendaStatus('${ag.id}', this.value)" class="px-2.5 py-1 rounded-full text-[11px] font-semibold border border-transparent focus:outline-none cursor-pointer ${statusColor}">
+                                <option value="Agendada" ${ag.status === 'Agendada' ? 'selected' : ''}>Agendada</option>
+                                <option value="Realizada" ${ag.status === 'Realizada' ? 'selected' : ''}>Realizada</option>
+                                <option value="Faltou / Cancelada (<24h)" ${ag.status.includes('Falt') ? 'selected' : ''}>Faltou / Cancelada (&lt;24h)</option>
+                                <option value="Remarcada" ${ag.status === 'Remarcada' ? 'selected' : ''}>Remarcada</option>
+                            </select>
+                        </td>
+                        <td class="py-3.5 px-4 text-right space-x-1.5 whitespace-nowrap">
+                            <button onclick="startLiveConsultation('${ag.patientId}')" class="px-3 py-1.5 bg-sage-600 hover:bg-sage-700 text-white rounded-lg font-semibold inline-flex items-center gap-1 shadow-sm">
+                                <i data-lucide="video" class="w-3.5 h-3.5"></i> Iniciar Sessão
+                            </button>
+                            <button onclick="sendWhatsAppReminder('${ag.patientId}', '${ag.date}', '${ag.time}')" class="px-2.5 py-1.5 bg-emerald-50 hover:bg-emerald-100 text-emerald-800 border border-emerald-200 rounded-lg font-semibold" title="Enviar Lembrete WhatsApp">
+                                WhatsApp
+                            </button>
+                        </td>
+                    </tr>
+                `;
+            }).join('');
+
+            // Radar Clínico (Sem Packs — Foco Clínico, Consentimentos e Sessões Pendentes)
+            const radar = document.getElementById('radar-clinico-list');
+            const alerts = [];
+            db.patients.forEach(p => {
+                if (!p.consentSigned) {
+                    alerts.push(`
+                        <div class="p-3 rounded-xl bg-amber-50 border border-amber-200 text-amber-950">
+                            <div class="font-bold">Consentimento OPP Pendente: ${displayPatientName(p)}</div>
+                            <p class="text-[11px] text-amber-800 mt-0.5">Falta recolher assinatura do Consentimento Informado para Telepsicologia.</p>
+                        </div>
+                    `);
+                }
+                if (p.riskLevel && p.riskLevel !== 'Sem Risco' && p.riskLevel !== 'Estável') {
+                    alerts.push(`
+                        <div class="p-3 rounded-xl bg-rose-50/70 border border-rose-200 text-rose-950">
+                            <div class="font-bold">Acompanhamento Clínico: ${displayPatientName(p)} (${p.riskLevel})</div>
+                            <p class="text-[11px] text-rose-800 mt-0.5 sensitive-note">${p.anamnese.motivo}</p>
+                        </div>
+                    `);
+                }
+            });
+            const unpaidList = db.payments.filter(x => x.status === 'Pendente');
+            if (unpaidList.length > 0) {
+                alerts.push(`
+                    <div class="p-3 rounded-xl bg-sand-100 border border-sand-200 text-slate-800">
+                        <div class="font-bold">${unpaidList.length} Sessão(ões) com Pagamento Pendente</div>
+                        <p class="text-[11px] text-slate-600 mt-0.5">Verifique a reconciliação no separador de Honorários & Recibos AT.</p>
+                    </div>
+                `);
+            }
+            radar.innerHTML = alerts.join('') || '<p class="text-slate-400">Todos os indicadores clínicos e consentimentos em dia.</p>';
+        }
+
+        function changeAgendaStatus(agId, newStatus) {
+            const ag = db.agenda.find(x => x.id === agId);
+            if (!ag) return;
+            ag.status = newStatus;
+            saveDB();
+            showToast(`Estado da consulta atualizado para: ${newStatus}`);
+        }
+
+        function openPatientFromAgenda(pid) {
+            selectedPatientId = pid;
+            switchTab('pacientes');
+        }
+
+        function startLiveConsultation(pid) {
+            selectedPatientId = pid;
+            document.getElementById('live-patient-select').value = pid;
+            switchTab('sessao');
+        }
+
+        function sendWhatsAppReminder(pid, date, time) {
+            const p = db.patients.find(x => x.id === pid);
+            if (!p) return;
+            const cleanPhone = p.phone.replace(/\s+/g, '');
+            const msg = encodeURIComponent(`Olá ${p.name.split(' ')[0]}, espero que esteja bem. Confirmo a nossa sessão de psicologia online agendada para ${date} às ${time}. Até já! — Cláudia Mesquita`);
+            window.open(`https://wa.me/351${cleanPhone}?text=${msg}`, '_blank');
+        }
+
+        // ==================== 2. COCKPIT "EM SESSÃO AO VIVO" & CRONÓMETRO ====================
+        function populatePatientSelects() {
+            const selects = ['live-patient-select', 'scale-patient-select', 'doc-patient-select'];
+            selects.forEach(id => {
+                const el = document.getElementById(id);
+                if (!el) return;
+                const currentVal = el.value || selectedPatientId;
+                el.innerHTML = db.patients.map(p => `<option value="${p.id}" ${p.id === currentVal ? 'selected' : ''}>${displayPatientName(p)}</option>`).join('');
+            });
+        }
+
+        function loadLiveSessionPatient(pid) {
+            const p = db.patients.find(x => x.id === pid) || db.patients[0];
+            if (!p) return;
+            selectedPatientId = p.id;
+
+            const fee = Number(p.sessionFee || db.profile.priceSingle || 50);
+            document.getElementById('live-fee-badge').textContent = `${fee.toFixed(2)} € / consulta individual`;
+            document.getElementById('live-session-amount').value = fee;
+            document.getElementById('live-video-link').href = p.videoLink || 'https://meet.google.com';
+
+            const lastSess = p.sessions && p.sessions.length > 0 ? p.sessions[p.sessions.length - 1] : null;
+            document.getElementById('live-last-summary').textContent = lastSess ? lastSess.themes : '1.ª Consulta — Sem sessões anteriores.';
+            document.getElementById('live-last-tpc').textContent = lastSess ? lastSess.tpc : 'Nenhum TPC anterior.';
+            document.getElementById('live-last-nexttopics').textContent = lastSess ? lastSess.nextTopics : 'Exploração inicial e enquadramento.';
+
+            document.getElementById('live-genograma').textContent = p.anamnese.genograma || '-';
+            document.getElementById('live-medicacao').textContent = p.anamnese.medicacao || '-';
+            document.getElementById('live-morada').textContent = p.onlineLocation || '-';
+            document.getElementById('live-emergencia').textContent = p.emergencyContact || '-';
+
+            const nextNum = (p.sessions ? p.sessions.length : 0) + 1;
+            document.getElementById('live-session-number-badge').textContent = `Sessão n.º ${nextNum}`;
+            document.getElementById('live-date').value = new Date().toISOString().slice(0, 10);
+        }
+
+        function startPauseTimer() {
+            const btn = document.getElementById('btn-timer-toggle');
+            if (timerInterval) {
+                clearInterval(timerInterval);
+                timerInterval = null;
+                btn.innerHTML = `<i data-lucide="play" class="w-3.5 h-3.5"></i> Retomar`;
+                lucide.createIcons();
+            } else {
+                timerInterval = setInterval(() => {
+                    timerSeconds++;
+                    const mins = Math.floor(timerSeconds / 60);
+                    const secs = timerSeconds % 60;
+                    document.getElementById('session-timer-display').textContent =
+                        `${String(mins).padStart(2, '0')}:${String(secs).padStart(2, '0')}`;
+
+                    const headerBar = document.getElementById('timer-header-bar');
+                    const statusLbl = document.getElementById('timer-status-label');
+                    if (mins >= 45 && mins < 50) {
+                        headerBar.className = "bg-amber-800 text-white rounded-2xl p-4 shadow-md flex flex-wrap items-center justify-between gap-4 transition-colors duration-500";
+                        statusLbl.textContent = "Aviso Suave: Faltam 5 min para fechar";
+                    } else if (mins >= 50) {
+                        headerBar.className = "bg-rose-900 text-white rounded-2xl p-4 shadow-md flex flex-wrap items-center justify-between gap-4 transition-colors duration-500";
+                        statusLbl.textContent = "50 Minutos Concluídos";
+                    }
+                }, 1000);
+                btn.innerHTML = `<i data-lucide="pause" class="w-3.5 h-3.5"></i> Pausar`;
+                lucide.createIcons();
+            }
+        }
+
+        function resetTimer() {
+            clearInterval(timerInterval);
+            timerInterval = null;
+            timerSeconds = 0;
+            document.getElementById('session-timer-display').textContent = "00:00";
+            document.getElementById('timer-status-label').textContent = "Tempo de Sessão (50 min)";
+            document.getElementById('timer-header-bar').className = "bg-sage-900 text-white rounded-2xl p-4 shadow-md flex flex-wrap items-center justify-between gap-4 transition-colors duration-500";
+            document.getElementById('btn-timer-toggle').innerHTML = `<i data-lucide="play" class="w-3.5 h-3.5"></i> Iniciar`;
+            lucide.createIcons();
+        }
+
+        function saveLiveSession(e) {
+            e.preventDefault();
+            const p = db.patients.find(x => x.id === selectedPatientId);
+            if (!p) return;
+
+            const newNum = (p.sessions ? p.sessions.length : 0) + 1;
+            const dateVal = document.getElementById('live-date').value;
+            const payStatus = document.getElementById('live-payment-status').value;
+            const sessionAmount = Number(document.getElementById('live-session-amount').value || p.sessionFee || db.profile.priceSingle || 50);
+
+            p.sessions.push({
+                num: newNum,
+                date: dateVal,
+                mood: Number(document.getElementById('live-mood').value),
+                themes: document.getElementById('live-themes').value,
+                intervention: document.getElementById('live-intervention').value,
+                tpc: document.getElementById('live-tpc').value,
+                nextTopics: document.getElementById('live-next-topics').value
+            });
+
+            db.payments.unshift({
+                id: 'FIN' + Date.now().toString().slice(-4),
+                date: dateVal,
+                patientId: p.id,
+                desc: `Sessão Clínica n.º ${newNum} (${p.modality || 'Online'})`,
+                amount: sessionAmount,
+                status: payStatus,
+                reciboAT: false
+            });
+
+            document.getElementById('live-themes').value = '';
+            document.getElementById('live-intervention').value = '';
+            document.getElementById('live-tpc').value = '';
+            document.getElementById('live-next-topics').value = '';
+
+            resetTimer();
+            saveDB();
+            showToast(`Sessão n.º ${newNum} guardada no dossier e lançada na conta-corrente.`);
+            switchTab('pacientes');
+        }
+
+        // ==================== 3. DOSSIERS CLÍNICOS & 4Ps ====================
+        function renderPatientsList() {
+            const q = (document.getElementById('search-patient-input')?.value || '').toLowerCase();
+            const list = document.getElementById('patients-sidebar-list');
+
+            const filtered = db.patients.filter(p =>
+                p.name.toLowerCase().includes(q) ||
+                p.code.toLowerCase().includes(q) ||
+                p.anamnese.motivo.toLowerCase().includes(q)
+            );
+
+            list.innerHTML = filtered.map(p => {
+                const active = p.id === selectedPatientId;
+                const riskDot = p.riskLevel === 'Monitorização Ativa' ? 'bg-rose-500' : p.riskLevel === 'Atenção' ? 'bg-amber-500' : 'bg-emerald-500';
+                const fee = Number(p.sessionFee || db.profile.priceSingle || 50);
+                return `
+                    <button onclick="selectPatient('${p.id}')" class="w-full text-left p-3.5 rounded-xl border transition flex items-center justify-between ${active ? 'bg-sage-50 border-sage-500 shadow-sm' : 'bg-white border-sand-200 hover:bg-sand-50'}">
+                        <div class="min-w-0 pr-2">
+                            <div class="font-bold text-xs text-slate-900 truncate">${displayPatientName(p)}</div>
+                            <div class="text-[11px] text-slate-500 truncate mt-0.5">${p.modality || 'Telepsicologia'} • ${fee.toFixed(2)}€/sessão</div>
+                        </div>
+                        <div class="flex items-center gap-2 shrink-0">
+                            <span class="w-2.5 h-2.5 rounded-full ${riskDot}" title="${p.riskLevel}"></span>
+                            <span class="text-[10px] font-mono text-slate-400">${p.code}</span>
+                        </div>
+                    </button>
+                `;
+            }).join('');
+        }
+
+        function selectPatient(pid) {
+            selectedPatientId = pid;
+            renderPatientsList();
+            renderPatientDossier(pid);
+            applyBlurClasses();
+            lucide.createIcons();
+        }
+
+        function renderPatientDossier(pid) {
+            const p = db.patients.find(x => x.id === pid) || db.patients[0];
+            if (!p) return;
+            const panel = document.getElementById('patient-dossier-panel');
+
+            const totalGoals = (p.objectives || []).length;
+            const doneGoals = (p.objectives || []).filter(o => o.status === 'Alcançado').length;
+            const goalPct = totalGoals > 0 ? Math.round((doneGoals / totalGoals) * 100) : 0;
+
+            const objectivesHtml = (p.objectives || []).map((o, idx) => `
+                <div class="flex items-center justify-between p-2.5 rounded-xl bg-sand-50 border border-sand-200 text-xs">
+                    <span class="font-medium text-slate-800">${o.text}</span>
+                    <button onclick="toggleObjectiveStatus('${p.id}', ${idx})" class="px-2.5 py-0.5 rounded-full text-[10px] font-bold ${o.status === 'Alcançado' ? 'bg-emerald-100 text-emerald-800' : 'bg-amber-100 text-amber-800'}">
+                        ${o.status}
+                    </button>
+                </div>
+            `).join('');
+
+            const sharedResHtml = (p.sharedResources || []).map(rTitle => `
+                <span class="inline-flex items-center gap-1 px-2.5 py-1 rounded-lg bg-sage-50 border border-sage-200 text-sage-800 text-[11px] font-medium">
+                    <i data-lucide="file-check-2" class="w-3 h-3 text-sage-600"></i> ${rTitle}
+                </span>
+            `).join('') || '<span class="text-slate-400 text-xs">Nenhum exercício prescrito ainda.</span>';
+
+            const sessionsHtml = [...(p.sessions || [])].reverse().map(s => `
+                <div class="p-4 rounded-xl bg-sand-50/70 border border-sand-200 space-y-2 text-xs sensitive-note">
+                    <div class="flex items-center justify-between border-b border-sand-200 pb-2">
+                        <span class="font-bold text-sage-900">Sessão n.º ${s.num} — ${s.date}</span>
+                        <span class="px-2 py-0.5 rounded bg-sage-100 text-sage-800 font-semibold text-[11px]">Humor Subjetivo: ${s.mood}/10</span>
+                    </div>
+                    <p class="text-slate-700 leading-relaxed"><strong>Temas & Observação:</strong> ${s.themes}</p>
+                    <p class="text-slate-600"><strong>Intervenção:</strong> ${s.intervention || '-'}</p>
+                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-2 pt-1">
+                        <div class="p-2 rounded bg-amber-50/70 border border-amber-200/70 text-[11px]"><strong>TPC:</strong> ${s.tpc || '-'}</div>
+                        <div class="p-2 rounded bg-sage-50/70 border border-sage-200/70 text-[11px]"><strong>Próxima sessão:</strong> ${s.nextTopics || '-'}</div>
+                    </div>
+                </div>
+            `).join('');
+
+            const fee = Number(p.sessionFee || db.profile.priceSingle || 50);
+
+            panel.innerHTML = `
+                <!-- Cabeçalho do Paciente -->
+                <div class="flex flex-wrap items-start justify-between gap-4 border-b border-sand-200 pb-4">
+                    <div>
+                        <div class="flex items-center flex-wrap gap-2">
+                            <span class="text-xs font-mono font-bold px-2 py-0.5 rounded bg-sage-100 text-sage-800">${p.code}</span>
+                            <h3 class="font-serif-clinical text-2xl font-bold text-slate-900">${displayPatientName(p)}</h3>
+                            <button onclick="toggleConsentStatus('${p.id}')" class="px-2.5 py-0.5 rounded-full text-[11px] font-semibold cursor-pointer ${p.consentSigned ? 'bg-emerald-100 text-emerald-800' : 'bg-rose-100 text-rose-800'}">
+                                ${p.consentSigned ? '✓ Consentimento OPP Assinado' : '⚠ Falta Consentimento (Clique p/ Validar)'}
+                            </button>
+                            <select onchange="changePatientRisk('${p.id}', this.value)" class="px-2.5 py-0.5 rounded-full text-[11px] font-bold border border-sand-200 bg-sand-50 cursor-pointer">
+                                <option value="Sem Risco" ${(p.riskLevel === 'Sem Risco' || p.riskLevel === 'Estável') ? 'selected' : ''}>🟢 Sem Risco</option>
+                                <option value="Atenção" ${p.riskLevel === 'Atenção' ? 'selected' : ''}>🟡 Atenção Clínica</option>
+                                <option value="Monitorização Ativa" ${p.riskLevel === 'Monitorização Ativa' ? 'selected' : ''}>🔴 Monitorização Ativa</option>
+                            </select>
+                        </div>
+                        <div class="flex flex-wrap items-center gap-4 text-xs text-slate-500 mt-2">
+                            <span><strong>Nasc.:</strong> ${p.birthDate}</span>
+                            <span><strong>Tel.:</strong> ${p.phone}</span>
+                            <span><strong>Honorários:</strong> <strong class="text-sage-800">${fee.toFixed(2)} € / consulta</strong></span>
+                            <span class="flex items-center gap-1">
+                                <strong>NIF:</strong> <code class="font-mono text-slate-800 font-bold">${p.nif}</code>
+                                <button onclick="copyNIF('${p.nif}')" class="px-1.5 py-0.5 bg-sand-100 hover:bg-sand-200 rounded text-[10px] font-semibold text-sage-800">Copiar NIF</button>
+                            </span>
+                        </div>
+                    </div>
+                    <div class="flex items-center gap-2">
+                        <button onclick="startLiveConsultation('${p.id}')" class="px-3.5 py-2 bg-sage-600 hover:bg-sage-700 text-white rounded-xl text-xs font-bold flex items-center gap-1.5 shadow-sm">
+                            <i data-lucide="video" class="w-4 h-4"></i> Abrir em Modo Sessão
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Bloco Segurança Telepsicologia -->
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 bg-sand-50 p-3.5 rounded-xl border border-sand-200 text-xs">
+                    <div>
+                        <span class="text-slate-400 block text-[10px] uppercase font-bold">Morada Física Habitual na Teleconsulta (OPP)</span>
+                        <span class="font-medium text-slate-800">${p.onlineLocation}</span>
+                    </div>
+                    <div>
+                        <span class="text-slate-400 block text-[10px] uppercase font-bold">Contacto de Emergência</span>
+                        <span class="font-semibold text-rose-800">${p.emergencyContact}</span>
+                    </div>
+                </div>
+
+                <!-- Anamnese & História Clínica -->
+                <div class="space-y-2 sensitive-note">
+                    <h4 class="font-bold text-xs uppercase tracking-wider text-sage-700">1. Anamnese, Medicação & Genograma Relacional</h4>
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-3 text-xs">
+                        <div class="p-3 rounded-xl bg-white border border-sand-200">
+                            <strong class="block text-slate-700 mb-1">Motivo do Pedido / Queixa Principal:</strong>
+                            <p class="text-slate-600 leading-relaxed">${p.anamnese.motivo}</p>
+                        </div>
+                        <div class="p-3 rounded-xl bg-white border border-sand-200">
+                            <strong class="block text-slate-700 mb-1">Genograma / Pessoas-Chave:</strong>
+                            <p class="text-slate-600 leading-relaxed">${p.anamnese.genograma}</p>
+                        </div>
+                        <div class="p-3 rounded-xl bg-white border border-sand-200">
+                            <strong class="block text-slate-700 mb-1">Medicação Ativa:</strong>
+                            <p class="text-slate-600">${p.anamnese.medicacao}</p>
+                        </div>
+                        <div class="p-3 rounded-xl bg-white border border-sand-200">
+                            <strong class="block text-slate-700 mb-1">Padrão de Sono & Rotina:</strong>
+                            <p class="text-slate-600">${p.anamnese.sono}</p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Conceptualização de Caso (Modelo dos 4 Ps) -->
+                <div class="space-y-2 sensitive-note">
+                    <h4 class="font-bold text-xs uppercase tracking-wider text-sage-700">2. Conceptualização Clínica de Caso (Modelo dos 4 Ps)</h4>
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-3 text-xs">
+                        <div class="p-3 rounded-xl bg-sand-50 border border-sand-200">
+                            <strong class="text-slate-800 block mb-1">Fatores Predisponentes (Vulnerabilidades):</strong>
+                            <p class="text-slate-600">${p.fourPs.predisponentes}</p>
+                        </div>
+                        <div class="p-3 rounded-xl bg-amber-50/50 border border-amber-200">
+                            <strong class="text-amber-950 block mb-1">Fatores Precipitantes (Gatilhos Atuais):</strong>
+                            <p class="text-slate-700">${p.fourPs.precipitantes}</p>
+                        </div>
+                        <div class="p-3 rounded-xl bg-rose-50/40 border border-rose-200">
+                            <strong class="text-rose-950 block mb-1">Fatores de Manutenção (Ciclos / Evitamento):</strong>
+                            <p class="text-slate-700">${p.fourPs.manutencao}</p>
+                        </div>
+                        <div class="p-3 rounded-xl bg-emerald-50/50 border border-emerald-200">
+                            <strong class="text-emerald-950 block mb-1">Fatores Protetores & Recursos do Paciente:</strong>
+                            <p class="text-slate-700">${p.fourPs.protetores}</p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Plano Terapêutico por Objetivos com Barra de Progresso -->
+                <div class="space-y-2 sensitive-note">
+                    <div class="flex items-center justify-between">
+                        <div class="flex items-center gap-3">
+                            <h4 class="font-bold text-xs uppercase tracking-wider text-sage-700">3. Plano Terapêutico & Objetivos (${goalPct}% concluído)</h4>
+                        </div>
+                        <button onclick="openModalAddObjective('${p.id}')" class="text-xs font-bold text-sage-700 hover:underline">+ Adicionar Objetivo</button>
+                    </div>
+                    <div class="w-full h-2 bg-sand-100 rounded-full overflow-hidden">
+                        <div class="bg-sage-600 h-full transition-all" style="width:${goalPct}%"></div>
+                    </div>
+                    <div class="space-y-2 pt-1">${objectivesHtml}</div>
+                </div>
+
+                <!-- Materiais Terapêuticos Partilhados -->
+                <div class="space-y-2">
+                    <h4 class="font-bold text-xs uppercase tracking-wider text-sage-700">4. Materiais e Exercícios Partilhados com o Paciente</h4>
+                    <div class="flex flex-wrap gap-2">${sharedResHtml}</div>
+                </div>
+
+                <!-- Diário Clínico Cronológico -->
+                <div class="space-y-3">
+                    <h4 class="font-bold text-xs uppercase tracking-wider text-sage-700">5. Histórico Cronológico de Sessões (${p.sessions.length})</h4>
+                    <div class="space-y-3">${sessionsHtml}</div>
+                </div>
+            `;
+        }
+
+        function toggleConsentStatus(pid) {
+            const p = db.patients.find(x => x.id === pid);
+            if (!p) return;
+            p.consentSigned = !p.consentSigned;
+            saveDB();
+            showToast(p.consentSigned ? "Consentimento OPP marcado como assinado." : "Consentimento marcado como pendente.");
+        }
+
+        function changePatientRisk(pid, level) {
+            const p = db.patients.find(x => x.id === pid);
+            if (!p) return;
+            p.riskLevel = level;
+            saveDB();
+            showToast(`Nível de atenção atualizado: ${level}`);
+        }
+
+        function toggleObjectiveStatus(pid, idx) {
+            const p = db.patients.find(x => x.id === pid);
+            if (!p) return;
+            p.objectives[idx].status = p.objectives[idx].status === 'Alcançado' ? 'Em trabalho' : 'Alcançado';
+            saveDB();
+        }
+
+        function openModalAddObjective(pid) {
+            showModal("Adicionar Objetivo Terapêutico", `
+                <div>
+                    <label class="block font-semibold mb-1">Descrição da Meta / Objetivo Clínico</label>
+                    <input type="text" name="goalText" required placeholder="Ex: Reduzir comportamentos de verificação..." class="w-full p-2.5 border rounded-xl">
+                </div>
+            `, fd => {
+                const p = db.patients.find(x => x.id === pid);
+                if (p) p.objectives.push({ text: fd.get('goalText'), status: "Em trabalho" });
+            });
+        }
+
+        // ==================== 4. ESCALAS PSICOMÉTRICAS (PHQ-9 & GAD-7) ====================
+        function switchScaleForm(type) {
+            currentScaleType = type;
+            document.getElementById('btn-scale-gad7').className = type === 'GAD7'
+                ? 'px-3 py-1.5 rounded-lg text-xs font-bold bg-sage-600 text-white'
+                : 'px-3 py-1.5 rounded-lg text-xs font-bold bg-sand-100 text-slate-700';
+        // ==================== 5. CONTROLO FINANCEIRO SESSÃO A SESSÃO & RECIBOS VERDES (AT) ====================
+        function filterFinance(mode) {
+            financeFilter = mode;
+            renderFinanceView();
+        }
+
+        function renderFinanceView() {
+            let totalPago = 0, totalPendente = 0, recibosPorEmitir = 0;
+            db.payments.forEach(f => {
+                if (f.status.startsWith('Pago')) {
+                    totalPago += Number(f.amount);
+                    if (!f.reciboAT) recibosPorEmitir++;
+                } else {
+                    totalPendente += Number(f.amount);
+                }
+            });
+
+            const totalAgenda = db.agenda.length || 1;
+            const faltas = db.agenda.filter(a => a.status.includes('Falt')).length;
+            const assiduidade = Math.round(((totalAgenda - faltas) / totalAgenda) * 100);
+
+            const summaryGrid = document.getElementById('finance-summary-grid');
+            summaryGrid.innerHTML = `
+                <div class="bg-white p-4 rounded-2xl border border-sand-200 shadow-sm">
+                    <span class="text-[11px] font-semibold text-slate-500">Total Recebido (Sessões Pagas)</span>
+                    <div class="text-xl font-extrabold text-emerald-700 mt-1 sensitive-data">${totalPago.toFixed(2)} €</div>
+                    <span class="text-[10px] text-slate-400">Pagamentos confirmados</span>
+                </div>
+                <div class="bg-white p-4 rounded-2xl border border-sand-200 shadow-sm">
+                    <span class="text-[11px] font-semibold text-slate-500">Pendente de Cobrança</span>
+                    <div class="text-xl font-extrabold text-amber-700 mt-1 sensitive-data">${totalPendente.toFixed(2)} €</div>
+                    <span class="text-[10px] text-slate-400">Sessões ou faltas &lt;24h por liquidar</span>
+                </div>
+                <div class="bg-white p-4 rounded-2xl border border-sand-200 shadow-sm">
+                    <span class="text-[11px] font-semibold text-slate-500">Recibos Verdes (AT) por Emitir</span>
+                    <div class="text-xl font-extrabold text-rose-600 mt-1">${recibosPorEmitir} recibo(s)</div>
+                    <span class="text-[10px] text-slate-400">Sessões pagas que aguardam emissão AT</span>
+                </div>
+                <div class="bg-white p-4 rounded-2xl border border-sand-200 shadow-sm">
+                    <span class="text-[11px] font-semibold text-slate-500">Taxa de Assiduidade</span>
+                    <div class="text-xl font-extrabold text-sage-800 mt-1">${assiduidade}%</div>
+                    <span class="text-[10px] text-slate-400">Consultas realizadas vs faltas</span>
+                </div>
+            `;
+
+            let list = db.payments;
+            if (financeFilter === 'PENDING_AT') {
+                list = db.payments.filter(f => f.status.startsWith('Pago') && !f.reciboAT);
+            } else if (financeFilter === 'UNPAID') {
+                list = db.payments.filter(f => !f.status.startsWith('Pago'));
+            }
+
+            const tbody = document.getElementById('finance-table-body');
+            tbody.innerHTML = list.map((f) => {
+                const p = db.patients.find(x => x.id === f.patientId);
+                const isPaid = f.status.startsWith('Pago');
+                return `
+                    <tr class="hover:bg-sand-50">
+                        <td class="py-3 px-4 font-semibold">${f.date}</td>
+                        <td class="py-3 px-4 font-bold text-slate-800">${displayPatientName(p)}</td>
+                        <td class="py-3 px-4">
+                            <div class="flex items-center gap-1.5">
+                                <code class="font-mono font-bold text-slate-800">${p ? p.nif : '-'}</code>
+                                ${p ? `<button onclick="copyNIF('${p.nif}')" class="px-2 py-0.5 bg-sand-100 hover:bg-sand-200 rounded text-[10px] font-semibold text-sage-800">Copiar NIF</button>` : ''}
+                            </div>
+                        </td>
+                        <td class="py-3 px-4">${f.desc}</td>
+                        <td class="py-3 px-4 font-bold text-slate-900 sensitive-data">${Number(f.amount).toFixed(2)} €</td>
+                        <td class="py-3 px-4">
+                            <button onclick="togglePaymentStatus('${f.id}')" class="px-2.5 py-0.5 rounded-full text-[11px] font-semibold cursor-pointer ${isPaid ? 'bg-emerald-100 text-emerald-800' : 'bg-amber-100 text-amber-800'}" title="Clique para alternar entre Pago e Pendente">
+                                ${f.status}
+                            </button>
+                        </td>
+                        <td class="py-3 px-4 text-right">
+                            <button onclick="toggleReciboAT('${f.id}')" class="px-3 py-1 rounded-lg text-[11px] font-bold ${f.reciboAT ? 'bg-emerald-600 text-white' : 'bg-rose-100 text-rose-800 hover:bg-rose-200'}">
+                                ${f.reciboAT ? '✓ Recibo AT Emitido' : 'Marcar Recibo AT Emitido'}
+                            </button>
+                        </td>
+                    </tr>
+                `;
+            }).join('');
+        }
+
+        function togglePaymentStatus(finId) {
+            const item = db.payments.find(x => x.id === finId);
+            if (!item) return;
+            item.status = item.status.startsWith('Pago') ? 'Pendente' : 'Pago MBWay';
+            saveDB();
+            showToast(`Estado de pagamento atualizado: ${item.status}`);
+        }
+
+        function toggleReciboAT(finId) {
+            const item = db.payments.find(x => x.id === finId);
+            if (!item) return;
+            item.reciboAT = !item.reciboAT;
+            saveDB();
+            showToast(item.reciboAT ? "Recibo Verde AT marcado como emitido." : "Recibo Verde marcado como pendente.");
+        }
+
+        function copyNIF(nif) {
+            copyTextToClipboard(nif, `NIF ${nif} copiado! Pode colar no Portal das Finanças.`);
+        }
+
+        function openModalNovoPagamento() {
+            const patientOptions = db.patients.map(p => `<option value="${p.id}">${p.name} (NIF: ${p.nif})</option>`).join('');
+            showModal("Registar Cobrança de Sessão Individual / Falta (<24h)", `
+                <div class="grid grid-cols-2 gap-3">
+                    <div class="col-span-2">
+                        <label class="block font-semibold mb-1">Paciente</label>
+                        <select name="patientId" class="w-full p-2.5 border rounded-xl">${patientOptions}</select>
+                    </div>
+                    <div>
+                        <label class="block font-semibold mb-1">Data da Sessão</label>
+                        <input type="date" name="date" value="${new Date().toISOString().slice(0,10)}" required class="w-full p-2.5 border rounded-xl">
+                    </div>
+                    <div>
+                        <label class="block font-semibold mb-1">Valor da Consulta (€)</label>
+                        <input type="number" step="0.01" name="amount" value="${db.profile.priceSingle || 50}" required class="w-full p-2.5 border rounded-xl">
+                    </div>
+                    <div class="col-span-2">
+                        <label class="block font-semibold mb-1">Descrição</label>
+                        <input type="text" name="desc" value="Sessão de Psicologia Clínica (Avulso)" required class="w-full p-2.5 border rounded-xl">
+                    </div>
+                    <div class="col-span-2">
+                        <label class="block font-semibold mb-1">Estado do Pagamento</label>
+                        <select name="status" class="w-full p-2.5 border rounded-xl">
+                            <option value="Pago MBWay">Pago (MBWay)</option>
+                            <option value="Pago Transferência">Pago (Transferência)</option>
+                            <option value="Pago Numerário">Pago (Numerário)</option>
+                            <option value="Pendente">Pendente de Pagamento (ou Falta &lt;24h)</option>
+                        </select>
+                    </div>
+                </div>
+            `, fd => {
+                db.payments.unshift({
+                    id: "FIN" + Date.now().toString().slice(-4),
+                    date: fd.get('date'),
+                    patientId: fd.get('patientId'),
+                    desc: fd.get('desc'),
+                    amount: Number(fd.get('amount')),
+                    status: fd.get('status'),
+                    reciboAT: false
+                });
+                showToast("Registo financeiro de sessão criado.");
+            });
+        }
+
+        // ==================== 6. BIBLIOTECA DE RECURSOS ====================
+        function renderResourcesView() {
+            const grid = document.getElementById('resources-grid');
+            grid.innerHTML = db.resources.map((r, idx) => `
+                <div class="bg-white p-5 rounded-2xl border border-sand-200 shadow-sm flex flex-col justify-between space-y-3">
+                    <div>
+                        <span class="px-2.5 py-0.5 rounded-full bg-sage-100 text-sage-800 text-[10px] font-bold uppercase">${r.category}</span>
+                        <h4 class="font-bold text-sm text-slate-800 mt-2">${r.title}</h4>
+                        <p class="text-xs text-slate-500 mt-1 leading-relaxed">${r.desc}</p>
+                    </div>
+                    <div class="pt-3 border-t border-sand-100 flex items-center justify-between text-xs">
+                        <span class="text-slate-400">Partilhado ${r.sharedCount}x</span>
+                        <button onclick="shareResourceWithPatient(${idx})" class="px-3 py-1.5 bg-sage-50 hover:bg-sage-100 text-sage-800 rounded-lg font-bold">
+                            + Prescrever a Paciente Ativo
+                        </button>
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        function shareResourceWithPatient(idx) {
+            const res = db.resources[idx];
+            const p = db.patients.find(x => x.id === selectedPatientId) || db.patients[0];
+            res.sharedCount++;
+            if (p) {
+                if (!p.sharedResources) p.sharedResources = [];
+                if (!p.sharedResources.includes(res.title)) p.sharedResources.push(res.title);
+                showToast(`Recurso "${res.title}" associado ao dossier de ${displayPatientName(p)}.`);
+            }
+            saveDB();
+        }
+
+        // ==================== 7. LISTA DE ESPERA ====================
+        function renderWaitlistView() {
+            const tbody = document.getElementById('waitlist-table-body');
+            tbody.innerHTML = db.waitlist.map((w, idx) => `
+                <tr class="hover:bg-sand-50">
+                    <td class="py-3 px-4 font-semibold">${w.date}</td>
+                    <td class="py-3 px-4">
+                        <div class="font-bold text-slate-800">${w.name}</div>
+                        <div class="text-[11px] text-slate-500">${w.contact}</div>
+                    </td>
+                    <td class="py-3 px-4">${w.reason}</td>
+                    <td class="py-3 px-4 font-medium text-sage-800">${w.preference}</td>
+                    <td class="py-3 px-4">
+                        <span class="px-2 py-0.5 rounded-full text-[10px] font-bold ${w.priority === 'Alta' ? 'bg-rose-100 text-rose-800' : 'bg-sand-100 text-slate-700'}">${w.priority}</span>
+                    </td>
+                    <td class="py-3 px-4 text-right">
+                        <button onclick="convertWaitlistToPatient(${idx})" class="px-3 py-1.5 bg-sage-600 hover:bg-sage-700 text-white rounded-lg font-bold text-[11px]">
+                            Converter em Paciente Ativo
+                        </button>
+                    </td>
+                </tr>
+            `).join('');
+        }
+
+        function convertWaitlistToPatient(idx) {
+            const w = db.waitlist[idx];
+            if (!w) return;
+            const newId = "P0" + (db.patients.length + 1);
+            db.patients.push({
+                id: newId,
+                code: "#" + newId,
+                name: w.name,
+                birthDate: "1995-01-01",
+                nif: "200000000",
+                phone: w.contact,
+                email: "",
+                onlineLocation: "Domicílio (Teleconsulta)",
+                emergencyContact: "A preencher na 1.ª sessão",
+                consentSigned: false,
+                riskLevel: "Sem Risco",
+                sessionFee: db.profile.priceSingle || 50,
+                modality: "Telepsicologia (Online)",
+                videoLink: "https://meet.google.com",
+                sharedResources: [],
+                anamnese: {
+                    motivo: w.reason,
+                    medicacao: "A avaliar",
+                    sono: "A avaliar",
+                    genograma: "A avaliar"
+                },
+                fourPs: {
+                    predisponentes: "Em avaliação inicial",
+                    precipitantes: w.reason,
+                    manutencao: "Em avaliação",
+                    protetores: "Procura ativa de ajuda terapêutica"
+                },
+                objectives: [{ text: "Estabelecer aliança terapêutica e levantamento de objetivos", status: "Em trabalho" }],
+                sessions: [],
+                scales: []
+            });
+            db.waitlist.splice(idx, 1);
+            selectedPatientId = newId;
+            saveDB();
+            showToast(`${w.name} convertido(a) em paciente ativo.`);
+            switchTab('pacientes');
+        }
+
+        // ==================== 8. EMISSOR DE DOCUMENTOS CLÍNICOS OFICIAIS ====================
+        function generateDocumentPreview() {
+            const tpl = document.getElementById('doc-template-select')?.value || 'PRESENCA';
+            const pid = document.getElementById('doc-patient-select')?.value || selectedPatientId;
+            const p = db.patients.find(x => x.id === pid) || db.patients[0];
+            const dateInput = document.getElementById('doc-date');
+            if (dateInput && !dateInput.value) dateInput.value = new Date().toISOString().slice(0, 10);
+            const dStr = dateInput?.value || new Date().toISOString().slice(0, 10);
+            const hours = document.getElementById('doc-hours')?.value || '15h00 às 15h50';
+
+            let content = '';
+            if (tpl === 'PRESENCA') {
+                content = `DECLARAÇÃO DE PRESENÇA EM CONSULTA
+
+Para os devidos efeitos, declara-se que ${p.name}, portador(a) do NIF ${p.nif}, esteve presente numa consulta de Psicologia Clínica no dia ${dStr}, no horário compreendido entre as ${hours}.
+
+Por ser verdade e me ter sido solicitado, passo a presente declaração que vai por mim assinada.
+
+Data: ${dStr}
+A Psicóloga Clínica,
+${db.profile.name} (${db.profile.opp})`;
+            } else if (tpl === 'CONSENTIMENTO') {
+                content = `CONSENTIMENTO INFORMADO PARA INTERVENÇÃO PSICOLÓGICA E TELEPSICOLOGIA
+(Em conformidade com o Código Deontológico da Ordem dos Psicólogos Portugueses e RGPD)
+
+Eu, ${p.name}, NIF ${p.nif}, declaro que fui devidamente informado(a) e compreendi as condições do acompanhamento psicológico prestado por ${db.profile.name} (${db.profile.opp}):
+
+1. SIGILO E CONFIDENCIALIDADE: Toda a informação partilhada em sessão é estritamente confidencial,4 estando abrangida pelo dever de sigilo profissional previsto no Código Deontológico da OPP.
+2. MODALIDADE ONLINE (TELEPSICOLOGIA): As sessões decorrem através de plataforma segura de videochamada, comprometendo-me a assegurar um espaço privado e reservado durante a consulta.
+3. SEGURANÇA E EMERGÊNCIA: Foi registado como contacto de segurança (${p.emergencyContact}) e localização habitual (${p.onlineLocation}) para situações de emergência clínica.
+4. HONORÁRIOS E CANCELAMENTOS: As desmarcações ou reagendamentos devem ocorrer com um mínimo de 24 horas de antecedência.
+
+Data: ${dStr}
+Assinatura do(a) Cliente: _________________________________________________`;
+            } else {
+                content = `RELATÓRIO DE ACOMPANHAMENTO PSICOLÓGICO (CONFIDENCIAL)
+
+Identificação: ${p.name} (NIF: ${p.nif})
+Data de Nascimento: ${p.birthDate}
+
+1. ENQUADRAMENTO E MOTIVO DO ACOMPANHAMENTO:
+${p.anamnese.motivo}
+
+2. SÍNTESE EVOLUTIVA E INTERVENÇÃO:
+O(A) cliente encontra-se em acompanhamento regular em Psicologia Clínica (n.º de sessões realizadas: ${p.sessions.length}), evidenciando adesão positiva às estratégias psicoterapêuticas propostas.
+
+3. RECOMENDAÇÕES CLÍNICAS:
+Sugere-se a manutenção do plano de intervenção em curso e articulação multidisciplinar se aplicável.
+
+Data: ${dStr}
+${db.profile.name} — Psicóloga Clínica (${db.profile.opp})`;
+            }
+
+            const area = document.getElementById('doc-editor-textarea');
+            if (area) area.value = content;
+        }
+
+        function printClinicalDocument() {
+            const text = document.getElementById('doc-editor-textarea').value.replace(/\n/g, '<br>');
+            const container = document.getElementById('print-container');
+            container.innerHTML = `
+                <div style="font-family: Georgia, serif; max-width: 700px; margin: 0 auto; line-height: 1.6;">
+                    <div style="border-bottom: 2px solid #3d5646; padding-bottom: 12px; margin-bottom: 28px; display: flex; justify-content: space-between; align-items: flex-end;">
+                        <div>
+                            <div style="font-size: 20pt; font-weight: bold; color: #2b3a31;">${db.profile.name}</div>
+                            <div style="font-size: 10pt; color: #4b6b56;">Psicóloga Clínica • ${db.profile.opp}</div>
+                        </div>
+                        <div style="font-size: 9pt; text-align: right; color: #555;">
+                            <div>${db.profile.email}</div>
+                            <div>Tel: ${db.profile.phone}</div>
+                        </div>
+                    </div>
+                    <div style="font-size: 11pt; color: #111; text-align: justify;">${text}</div>
+                </div>
+            `;
+            window.print();
+        }
+
+        // ==================== MODAIS DE CRIAÇÃO ====================
+        let modalCallback = null;
+
+        function showModal(title, htmlFields, callback) {
+            document.getElementById('modal-title').textContent = title;
+            document.getElementById('modal-form').innerHTML = htmlFields + `
+                <div class="flex justify-end gap-2 pt-3 border-t border-sand-100">
+                    <button type="button" onclick="closeModal()" class="px-4 py-2 rounded-xl border border-sand-200 font-semibold text-slate-600">Cancelar</button>
+                    <button type="submit" class="px-5 py-2 rounded-xl bg-sage-600 text-white font-bold">Guardar</button>
+                </div>
+            `;
+            modalCallback = callback;
+            const m = document.getElementById('modal-generic');
+            m.classList.remove('hidden');
+            m.classList.add('flex');
+        }
+
+        function closeModal() {
+            const m = document.getElementById('modal-generic');
+            m.classList.add('hidden');
+            m.classList.remove('flex');
+        }
+
+        function submitModalForm(e) {
+            e.preventDefault();
+            if (modalCallback) modalCallback(new FormData(e.target));
+            saveDB();
+            closeModal();
+        }
+
+        function openModalNovaSessaoAgenda() {
+            const patientOptions = db.patients.map(p => `<option value="${p.id}">${p.name} (${p.code}) — ${Number(p.sessionFee || db.profile.priceSingle || 50).toFixed(2)}€</option>`).join('');
+            showModal("Agendar Nova Consulta Individual (Online / Presencial)", `
+                <div class="grid grid-cols-2 gap-3">
+                    <div class="col-span-2">
+                        <label class="block font-semibold mb-1">Paciente</label>
+                        <select name="patientId" class="w-full p-2.5 border rounded-xl">${patientOptions}</select>
+                    </div>
+                    <div>
+                        <label class="block font-semibold mb-1">Data</label>
+                        <input type="date" name="date" value="${new Date().toISOString().slice(0,10)}" required class="w-full p-2.5 border rounded-xl">
+                    </div>
+                    <div>
+                        <label class="block font-semibold mb-1">Hora</label>
+                        <input type="time" name="time" value="15:00" required class="w-full p-2.5 border rounded-xl">
+                    </div>
+                    <div class="col-span-2">
+                        <label class="block font-semibold mb-1">Formato / Observação</label>
+                        <input type="text" name="type" value="Consulta Online (50 min)" required class="w-full p-2.5 border rounded-xl">
+                    </div>
+                </div>
+            `, fd => {
+                db.agenda.push({
+                    id: "AG" + Date.now().toString().slice(-4),
+                    patientId: fd.get('patientId'),
+                    date: fd.get('date'),
+                    time: fd.get('time'),
+                    type: fd.get('type'),
+                    status: "Agendada"
+                });
+                showToast("Consulta agendada com sucesso.");
+            });
+        }
+
+        function openModalNovoPaciente() {
+            showModal("Criar Novo Dossier Clínico de Paciente", `
+                <div class="grid grid-cols-2 gap-3">
+                    <div class="col-span-2"><label class="block font-semibold mb-1">Nome Completo</label><input name="name" required class="w-full p-2 border rounded-xl"></div>
+                    <div><label class="block font-semibold mb-1">Data de Nascimento</label><input type="date" name="birthDate" value="1994-06-15" class="w-full p-2 border rounded-xl"></div>
+                    <div><label class="block font-semibold mb-1">NIF (Faturação AT)</label><input name="nif" required placeholder="Ex: 245678901" class="w-full p-2 border rounded-xl"></div>
+                    <div><label class="block font-semibold mb-1">Telemóvel / WhatsApp</label><input name="phone" required class="w-full p-2 border rounded-xl"></div>
+                    <div><label class="block font-semibold mb-1">Honorários por Consulta (€)</label><input type="number" step="0.01" name="sessionFee" value="${db.profile.priceSingle || 50}" required class="w-full p-2 border rounded-xl"></div>
+                    <div class="col-span-2"><label class="block font-semibold mb-1">Formato de Consulta</label><select name="modality" class="w-full p-2 border rounded-xl"><option value="Telepsicologia (Online)">Telepsicologia (Online)</option><option value="Consulta Presencial">Consulta Presencial</option></select></div>
+                    <div class="col-span-2"><label class="block font-semibold mb-1">Link da Sala de Videochamada (Google Meet / Zoom / Teams)</label><input name="videoLink" value="https://meet.google.com/" class="w-full p-2 border rounded-xl"></div>
+                    <div class="col-span-2"><label class="block font-semibold mb-1">Morada Física Habitual na Teleconsulta (Norma OPP)</label><input name="onlineLocation" required placeholder="Rua, Cidade..." class="w-full p-2 border rounded-xl"></div>
+                    <div class="col-span-2"><label class="block font-semibold mb-1">Contacto de Emergência (Nome, Parentesco e Telefone)</label><input name="emergencyContact" required class="w-full p-2 border rounded-xl"></div>
+                    <div class="col-span-2"><label class="block font-semibold mb-1">Motivo do Pedido / Queixa Inicial</label><textarea name="motivo" rows="2" required class="w-full p-2 border rounded-xl"></textarea></div>
+                </div>
+            `, fd => {
+                const newId = "P0" + (db.patients.length + 1);
+                db.patients.push({
+                    id: newId,
+                    code: "#" + newId,
+                    name: fd.get('name'),
+                    birthDate: fd.get('birthDate'),
+                    nif: fd.get('nif'),
+                    phone: fd.get('phone'),
+                    email: "",
+                    onlineLocation: fd.get('onlineLocation'),
+                    emergencyContact: fd.get('emergencyContact'),
+                    consentSigned: true,
+                    riskLevel: "Sem Risco",
+                    sessionFee: Number(fd.get('sessionFee') || 50),
+                    modality: fd.get('modality'),
+                    videoLink: fd.get('videoLink'),
+                    sharedResources: [],
+                    anamnese: {
+                        motivo: fd.get('motivo'),
+                        medicacao: "Sem medicação registada",
+                        sono: "Regular",
+                        genograma: "A detalhar nas próximas sessões"
+                    },
+                    fourPs: {
+                        predisponentes: "A explorar",
+                        precipitantes: fd.get('motivo'),
+                        manutencao: "A explorar",
+                        protetores: "Motivação para o processo terapêutico"
+                    },
+                    objectives: [{ text: "Avaliação inicial e definição conjunta de metas terapêuticas", status: "Em trabalho" }],
+                    sessions: [],
+                    scales: []
+                });
+                selectedPatientId = newId;
+                showToast("Dossier clínico criado com sucesso.");
+            });
+        }
+
+        function openModalNovoPaciente() {
+            showModal("Criar Novo Dossier Clínico de Paciente", `
+                <div class="grid grid-cols-2 gap-3">
+                    <div class="col-span-2"><label class="block font-semibold mb-1">Nome Completo</label><input name="name" required class="w-full p-2 border rounded-xl"></div>
+                    <div><label class="block font-semibold mb-1">Data de Nascimento</label><input type="date" name="birthDate" value="1994-06-15" class="w-full p-2 border rounded-xl"></div>
+                    <div><label class="block font-semibold mb-1">NIF (Faturação AT)</label><input name="nif" required placeholder="Ex: 245678901" class="w-full p-2 border rounded-xl"></div>
+                    <div><label class="block font-semibold mb-1">Telemóvel / WhatsApp</label><input name="phone" required class="w-full p-2 border rounded-xl"></div>
+                    <div><label class="block font-semibold mb-1">Modalidade</label><select name="modality" class="w-full p-2 border rounded-xl"><option value="Pack 4 Sessões">Pack 4 Sessões</option><option value="Sessão Individual">Sessão Individual</option></select></div>
+                    <div class="col-span-2"><label class="block font-semibold mb-1">Link da Sala de Videochamada (Google Meet / Zoom)</label><input name="videoLink" value="https://meet.google.com/" class="w-full p-2 border rounded-xl"></div>
+                    <div class="col-span-2"><label class="block font-semibold mb-1">Morada Física Habitual na Teleconsulta (Norma OPP)</label><input name="onlineLocation" required placeholder="Rua, Cidade..." class="w-full p-2 border rounded-xl"></div>
+                    <div class="col-span-2"><label class="block font-semibold mb-1">Contacto de Emergência (Nome, Parentesco e Telefone)</label><input name="emergencyContact" required class="w-full p-2 border rounded-xl"></div>
+                    <div class="col-span-2"><label class="block font-semibold mb-1">Motivo do Pedido / Queixa Inicial</label><textarea name="motivo" rows="2" required class="w-full p-2 border rounded-xl"></textarea></div>
+                </div>
+            `, fd => {
+                const newId = "P0" + (db.patients.length + 1);
+                const isPack = fd.get('modality') === 'Pack 4 Sessões';
+                db.patients.push({
+                    id: newId,
+                    code: "#" + newId,
+                    name: fd.get('name'),
+                    birthDate: fd.get('birthDate'),
+                    nif: fd.get('nif'),
+                    phone: fd.get('phone'),
+                    email: "",
+                    onlineLocation: fd.get('onlineLocation'),
+                    emergencyContact: fd.get('emergencyContact'),
+                    consentSigned: true,
+                    riskLevel: "Estável",
+                    modality: fd.get('modality'),
+                    packCurrent: isPack ? 1 : 0,
+                    packTotal: isPack ? 4 : 0,
+                    videoLink: fd.get('videoLink'),
+                    anamnese: {
+                        motivo: fd.get('motivo'),
+                        medicacao: "Sem medicação registada",
+                        sono: "Regular",
+                        genograma: "A detalhar nas próximas sessões"
+                    },
+                    fourPs: {
+                        predisponentes: "A explorar",
+                        precipitantes: fd.get('motivo'),
+                        manutencao: "A explorar",
+                        protetores: "Motivação para o processo terapêutico"
+                    },
+                    objectives: [{ text: "Avaliação inicial e definição conjunta de metas terapêuticas", status: "Em trabalho" }],
+                    sessions: [],
+                    scales: []
+                });
+                selectedPatientId = newId;
+            });
+        }
+
+        function openModalNovoRecurso() {
+            showModal("Adicionar Recurso Terapêutico à Biblioteca", `
+                <div class="space-y-3">
+                    <div><label class="block font-semibold mb-1">Título do Exercício / Material</label><input name="title" required class="w-full p-2 border rounded-xl"></div>
+                    <div><label class="block font-semibold mb-1">Categoria Clínica</label><input name="category" placeholder="Ex: Ansiedade / Mindfulness / Luto" required class="w-full p-2 border rounded-xl"></div>
+                    <div><label class="block font-semibold mb-1">Descrição / Instruções para o Paciente</label><textarea name="desc" rows="3" required class="w-full p-2 border rounded-xl"></textarea></div>
+                </div>
+            `, fd => {
+                db.resources.push({
+                    id: "R0" + (db.resources.length + 1),
+                    title: fd.get('title'),
+                    category: fd.get('category'),
+                    desc: fd.get('desc'),
+                    sharedCount: 1
+                });
+            });
+        }
+
+        function openModalListaEspera() {
+            showModal("Novo Pedido na Lista de Espera", `
+                <div class="grid grid-cols-2 gap-3">
+                    <div><label class="block font-semibold mb-1">Nome</label><input name="name" required class="w-full p-2 border rounded-xl"></div>
+                    <div><label class="block font-semibold mb-1">Contacto</label><input name="contact" required class="w-full p-2 border rounded-xl"></div>
+                    <div class="col-span-2"><label class="block font-semibold mb-1">Motivo Breve</label><input name="reason" required class="w-full p-2 border rounded-xl"></div>
+                    <div><label class="block font-semibold mb-1">Preferência Horária</label><input name="preference" value="Pós-Laboral (18h-20h)" class="w-full p-2 border rounded-xl"></div>
+                    <div><label class="block font-semibold mb-1">Prioridade</label><select name="priority" class="w-full p-2 border rounded-xl"><option>Normal</option><option>Alta</option></select></div>
+                </div>
+            `, fd => {
+                db.waitlist.push({
+                    id: "W0" + (db.waitlist.length + 1),
+                    date: new Date().toISOString().slice(0, 10),
+                    name: fd.get('name'),
+                    contact: fd.get('contact'),
+                    reason: fd.get('reason'),
+                    preference: fd.get('preference'),
+                    priority: fd.get('priority')
+                });
+            });
+        }
+
+        // ==================== 9. PERFIL, BACKUP JSON & EXPORTAÇÃO ICS ====================
+        function loadProfileForm() {
+            document.getElementById('cfg-name').value = db.profile.name || '';
+            document.getElementById('cfg-opp').value = db.profile.opp || '';
+            document.getElementById('cfg-email').value = db.profile.email || '';
+            document.getElementById('cfg-phone').value = db.profile.phone || '';
+            document.getElementById('cfg-price-single').value = db.profile.priceSingle || 50;
+            document.getElementById('cfg-pin').value = db.profile.pin || '1234';
+        }
+
+        function saveProfileConfig(e) {
+            e.preventDefault();
+            db.profile.name = document.getElementById('cfg-name').value;
+            db.profile.opp = document.getElementById('cfg-opp').value;
+            db.profile.email = document.getElementById('cfg-email').value;
+            db.profile.phone = document.getElementById('cfg-phone').value;
+            db.profile.priceSingle = Number(document.getElementById('cfg-price-single').value);
+            db.profile.pin = document.getElementById('cfg-pin').value;
+            saveDB();
+            showToast("Dados profissionais da Dra. Cláudia guardados com sucesso!");
+        }
+
+        function exportBackupJSON() {
+            const blob = new Blob([JSON.stringify(db, null, 2)], { type: 'application/json' });
+            const a = document.createElement('a');
+            a.href = URL.createObjectURL(blob);
+            a.download = `psistudio_claudia_backup_${new Date().toISOString().slice(0, 10)}.json`;
+            a.click();
+        }
+
+        function importBackupJSON(event) {
+            const file = event.target.files[0];
+            if (!file) return;
+            const reader = new FileReader();
+            reader.onload = e => {
+                try {
+                    const parsed = JSON.parse(e.target.result);
+                    if (parsed.patients && parsed.profile) {
+                        db = parsed;
+                        saveDB();
+                        showToast("Cópia de segurança restaurada com sucesso!");
+                    }
+                } catch {
+                    showToast("Ficheiro .json inválido.");
+                }
+            };
+            reader.readAsText(file);
+        }
+
+        function resetToDemoData() {
+            db = JSON.parse(JSON.stringify(INITIAL_DEMO_DATA));
+            selectedPatientId = 'P01';
+            saveDB();
+        }
+
+        function clearAllForProduction() {
+            db.patients = [];
+            db.agenda = [];
+            db.payments = [];
+            db.waitlist = [];
+            saveDB();
+        }
+
+        function exportAgendaICS() {
+            let ics = "BEGIN:VCALENDAR\nVERSION:2.0\nPRODID:-//PsiStudio//ClaudiaMesquita//PT\n";
+            db.agenda.forEach(ag => {
+                const p = db.patients.find(x => x.id === ag.patientId);
+                const cleanDate = ag.date.replace(/-/g, '');
+                const cleanTime = ag.time.replace(':', '') + '00';
+                ics += `BEGIN:VEVENT\nDTSTART:${cleanDate}T${cleanTime}\nSUMMARY:Consulta Psicologia - ${p ? p.code : 'Paciente'}\nDESCRIPTION:${ag.type}\nEND:VEVENT\n`;
+            });
+            ics += "END:VCALENDAR";
+            const blob = new Blob([ics], { type: 'text/calendar;charset=utf-8' });
+            const a = document.createElement('a');
+            a.href = URL.createObjectURL(blob);
+            a.download = 'agenda_psistudio_claudia.ics';
+            a.click();
+        }
+
+        window.addEventListener('DOMContentLoaded', () => {
+            renderAll();
+        });
+    </script>
+</body>
+</html>
