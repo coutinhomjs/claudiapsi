@@ -542,6 +542,10 @@
                             <h5 class="font-bold text-xs uppercase text-slate-500 mb-2">Histórico de Avaliações</h5>
                             <div id="scale-history-list" class="space-y-1.5 text-xs max-h-44 overflow-y-auto"></div>
                         </div>
+                    </div>
+                </div>
+            </section>
+
             <!-- ==================== VISTA 5: HONORÁRIOS SESSÃO A SESSÃO & CONTROLO FISCAL AT ==================== -->
             <section id="view-financeiro" class="tab-view hidden space-y-6">
                 <div class="bg-white rounded-2xl border border-sand-200 p-5 shadow-sm flex flex-wrap items-center justify-between gap-4">
@@ -1621,6 +1625,105 @@
             document.getElementById('btn-scale-gad7').className = type === 'GAD7'
                 ? 'px-3 py-1.5 rounded-lg text-xs font-bold bg-sage-600 text-white'
                 : 'px-3 py-1.5 rounded-lg text-xs font-bold bg-sand-100 text-slate-700';
+            document.getElementById('btn-scale-phq9').className = type === 'PHQ9'
+                ? 'px-3 py-1.5 rounded-lg text-xs font-bold bg-sage-600 text-white'
+                : 'px-3 py-1.5 rounded-lg text-xs font-bold bg-sand-100 text-slate-700';
+            renderScalesView();
+        }
+
+        function renderScalesView() {
+            const items = currentScaleType === 'GAD7' ? GAD7_ITEMS : PHQ9_ITEMS;
+            const qBox = document.getElementById('scale-questions-container');
+            if (!qBox) return;
+
+            qBox.innerHTML = items.map((q, idx) => `
+                <div class="p-2.5 rounded-xl bg-sand-50 border border-sand-200 flex items-center justify-between gap-3">
+                    <span class="text-slate-700 font-medium">${q}</span>
+                    <select onchange="calculateScaleLive()" class="scale-item-select p-1.5 rounded-lg border border-sand-200 bg-white font-bold text-sage-900 shrink-0">
+                        <option value="0">0 - Nunca</option>
+                        <option value="1">1 - Vários dias</option>
+                        <option value="2">2 - Mais de metade</option>
+                        <option value="3">3 - Quase todos os dias</option>
+                    </select>
+                </div>
+            `).join('');
+
+            calculateScaleLive();
+            renderScaleChartAndHistory();
+        }
+
+        function calculateScaleLive() {
+            let sum = 0;
+            document.querySelectorAll('.scale-item-select').forEach(s => sum += Number(s.value || 0));
+            let label = "Mínima / Sem Sintomatologia";
+            if (sum >= 15) label = "Severa";
+            else if (sum >= 10) label = "Moderada";
+            else if (sum >= 5) label = "Ligeira";
+
+            const scoreEl = document.getElementById('scale-live-score');
+            if (scoreEl) scoreEl.textContent = `${sum} pontos — ${label}`;
+            return { sum, label };
+        }
+
+        function saveScaleEvaluation() {
+            const pid = document.getElementById('scale-patient-select')?.value || selectedPatientId;
+            const p = db.patients.find(x => x.id === pid) || db.patients[0];
+            if (!p) return;
+            const { sum, label } = calculateScaleLive();
+            if (!p.scales) p.scales = [];
+            p.scales.push({
+                date: new Date().toISOString().slice(0, 10),
+                type: currentScaleType === 'GAD7' ? 'GAD-7' : 'PHQ-9',
+                score: sum,
+                label
+            });
+            saveDB();
+            showToast(`Avaliação ${currentScaleType} (${sum} pts) guardada no dossier.`);
+        }
+
+        function renderScaleChartAndHistory() {
+            const pid = document.getElementById('scale-patient-select')?.value || selectedPatientId;
+            const p = db.patients.find(x => x.id === pid) || db.patients[0];
+            const histBox = document.getElementById('scale-history-list');
+            const chartBox = document.getElementById('scale-chart-box');
+            if (!p || !histBox || !chartBox) return;
+
+            const scales = p.scales || [];
+            histBox.innerHTML = [...scales].reverse().map(s => `
+                <div class="p-2 rounded-lg bg-sand-50 border border-sand-200 flex items-center justify-between">
+                    <span><strong>${s.type}</strong> (${s.date})</span>
+                    <span class="px-2 py-0.5 rounded bg-sage-100 text-sage-900 font-bold">${s.score} pts — ${s.label}</span>
+                </div>
+            `).join('') || '<p class="text-slate-400">Sem avaliações registadas.</p>';
+
+            if (scales.length === 0) {
+                chartBox.innerHTML = '<span class="text-xs text-slate-400">Registe uma avaliação para visualizar o gráfico longitudinal.</span>';
+                return;
+            }
+
+            const maxScore = 27;
+            const pts = scales.map((s, i) => {
+                const x = scales.length === 1 ? 150 : 30 + (i * (240 / (scales.length - 1)));
+                const y = 140 - Math.round((s.score / maxScore) * 110);
+                return { x, y, score: s.score, date: s.date.slice(5) };
+            });
+
+            const polyline = pts.map(pt => `${pt.x},${pt.y}`).join(' ');
+            const circles = pts.map(pt => `
+                <circle cx="${pt.x}" cy="${pt.y}" r="5" fill="#4b6b56" />
+                <text x="${pt.x}" y="${pt.y - 10}" text-anchor="middle" font-size="10" font-weight="bold" fill="#2b3a31">${pt.score}</text>
+                <text x="${pt.x}" y="160" text-anchor="middle" font-size="9" fill="#64748b">${pt.date}</text>
+            `).join('');
+
+            chartBox.innerHTML = `
+                <svg viewBox="0 0 300 170" class="w-full h-full">
+                    <line x1="20" y1="140" x2="280" y2="140" stroke="#cbd5e1" stroke-width="1" />
+                    <polyline fill="none" stroke="#61866d" stroke-width="3" points="${polyline}" />
+                    ${circles}
+                </svg>
+            `;
+        }
+
         // ==================== 5. CONTROLO FINANCEIRO SESSÃO A SESSÃO & RECIBOS VERDES (AT) ====================
         function filterFinance(mode) {
             financeFilter = mode;
@@ -2059,58 +2162,6 @@ ${db.profile.name} — Psicóloga Clínica (${db.profile.opp})`;
                 });
                 selectedPatientId = newId;
                 showToast("Dossier clínico criado com sucesso.");
-            });
-        }
-
-        function openModalNovoPaciente() {
-            showModal("Criar Novo Dossier Clínico de Paciente", `
-                <div class="grid grid-cols-2 gap-3">
-                    <div class="col-span-2"><label class="block font-semibold mb-1">Nome Completo</label><input name="name" required class="w-full p-2 border rounded-xl"></div>
-                    <div><label class="block font-semibold mb-1">Data de Nascimento</label><input type="date" name="birthDate" value="1994-06-15" class="w-full p-2 border rounded-xl"></div>
-                    <div><label class="block font-semibold mb-1">NIF (Faturação AT)</label><input name="nif" required placeholder="Ex: 245678901" class="w-full p-2 border rounded-xl"></div>
-                    <div><label class="block font-semibold mb-1">Telemóvel / WhatsApp</label><input name="phone" required class="w-full p-2 border rounded-xl"></div>
-                    <div><label class="block font-semibold mb-1">Modalidade</label><select name="modality" class="w-full p-2 border rounded-xl"><option value="Pack 4 Sessões">Pack 4 Sessões</option><option value="Sessão Individual">Sessão Individual</option></select></div>
-                    <div class="col-span-2"><label class="block font-semibold mb-1">Link da Sala de Videochamada (Google Meet / Zoom)</label><input name="videoLink" value="https://meet.google.com/" class="w-full p-2 border rounded-xl"></div>
-                    <div class="col-span-2"><label class="block font-semibold mb-1">Morada Física Habitual na Teleconsulta (Norma OPP)</label><input name="onlineLocation" required placeholder="Rua, Cidade..." class="w-full p-2 border rounded-xl"></div>
-                    <div class="col-span-2"><label class="block font-semibold mb-1">Contacto de Emergência (Nome, Parentesco e Telefone)</label><input name="emergencyContact" required class="w-full p-2 border rounded-xl"></div>
-                    <div class="col-span-2"><label class="block font-semibold mb-1">Motivo do Pedido / Queixa Inicial</label><textarea name="motivo" rows="2" required class="w-full p-2 border rounded-xl"></textarea></div>
-                </div>
-            `, fd => {
-                const newId = "P0" + (db.patients.length + 1);
-                const isPack = fd.get('modality') === 'Pack 4 Sessões';
-                db.patients.push({
-                    id: newId,
-                    code: "#" + newId,
-                    name: fd.get('name'),
-                    birthDate: fd.get('birthDate'),
-                    nif: fd.get('nif'),
-                    phone: fd.get('phone'),
-                    email: "",
-                    onlineLocation: fd.get('onlineLocation'),
-                    emergencyContact: fd.get('emergencyContact'),
-                    consentSigned: true,
-                    riskLevel: "Estável",
-                    modality: fd.get('modality'),
-                    packCurrent: isPack ? 1 : 0,
-                    packTotal: isPack ? 4 : 0,
-                    videoLink: fd.get('videoLink'),
-                    anamnese: {
-                        motivo: fd.get('motivo'),
-                        medicacao: "Sem medicação registada",
-                        sono: "Regular",
-                        genograma: "A detalhar nas próximas sessões"
-                    },
-                    fourPs: {
-                        predisponentes: "A explorar",
-                        precipitantes: fd.get('motivo'),
-                        manutencao: "A explorar",
-                        protetores: "Motivação para o processo terapêutico"
-                    },
-                    objectives: [{ text: "Avaliação inicial e definição conjunta de metas terapêuticas", status: "Em trabalho" }],
-                    sessions: [],
-                    scales: []
-                });
-                selectedPatientId = newId;
             });
         }
 
